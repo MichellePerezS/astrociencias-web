@@ -1,0 +1,147 @@
+/* AstroCiencias Ecuador — estilos globales
+   Colores y medidas del sistema de diseño de ACE. */
+
+:root {
+  /* Colores */
+  --cosmos: #061423;          /* fondo principal, azul noche */
+  --cosmos-2: #0b1a2a;        /* tarjetas y bandas */
+  --cosmos-3: #0b2a44;        /* bloques destacados */
+  --linea: #1c3954;           /* bordes finos */
+  --linea-fuerte: #2f5677;
+  --texto: #eef2f6;           /* texto principal sobre fondo oscuro */
+  --texto-suave: #a9b8c6;     /* texto secundario */
+  --texto-tenue: #7f95aa;     /* metadatos */
+  --azul: #4fa3cf;            /* botones y enlaces */
+  --azul-hover: #8ccbec;
+  --dorado: #c6b99b;          /* detalles y etiquetas */
+  --error: #f2b8a2;           /* mensajes de error sobre fondo oscuro */
+
+  /* Modo lectura (artículos del blog, fondo blanco) */
+  --papel: #ffffff;
+  --tinta: #1a1a1a;           /* texto principal */
+  --tinta-suave: #2c343b;     /* entradilla */
+  --tinta-tenue: #4f5b66;     /* metadatos y notas */
+  --borde-claro: #d9d6cc;     /* separadores */
+  --borde-campo: #b9c4cd;     /* bordes de formularios */
+  --cielo: #dceaf3;           /* etiquetas y cabeceras de tabla */
+  --cielo-suave: #f4f8fb;     /* fondo de formularios */
+  --enlace: #126e98;          /* enlaces y botones sobre blanco */
+  --enlace-hover: #0b597f;
+  --dorado-tinta: #7a6a48;    /* fechas y avisos sobre blanco */
+  --crema: #fffdf7;           /* fondo de avisos */
+
+  /* Tipografías */
+  --font-titulos: "Space Grotesk", system-ui, sans-serif;
+  --font-texto: "Source Sans 3", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Espacios y esquinas */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-12: 48px;
+  --space-24: 96px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --ancho-max: 1240px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--cosmos);
+  color: var(--texto);
+  font-family: var(--font-texto);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-titulos);
+  line-height: 1.15;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--azul);
+}
+
+a:hover {
+  color: var(--azul-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--dorado);
+  outline-offset: 3px;
+}
+
+/* Utilidades */
+.contenedor {
+  max-width: var(--ancho-max);
+  margin: 0 auto;
+  padding-inline: var(--space-6);
+}
+
+.etiqueta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--dorado);
+  text-transform: uppercase;
+}
+
+.boton {
+  display: inline-block;
+  font-family: var(--font-titulos);
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.boton-principal {
+  background: var(--azul);
+  color: var(--cosmos);
+}
+
+.boton-principal:hover {
+  background: var(--azul-hover);
+  color: var(--cosmos);
+}
+
+.boton-secundario {
+  color: var(--texto);
+  border: 1px solid var(--linea-fuerte);
+  padding: 13px 23px;
+}
+
+.boton-secundario:hover {
+  color: var(--texto);
+  border-color: var(--dorado);
+}

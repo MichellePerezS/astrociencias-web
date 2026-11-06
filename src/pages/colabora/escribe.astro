@@ -1,0 +1,314 @@
+---
+import Base from "../../layouts/Base.astro";
+import { AREAS } from "../../content/areas";
+
+// Formulario de Netlify Forms «articulo-colaborador».
+// Los envíos y sus adjuntos aparecen en el panel de Netlify, sección «Forms».
+// Netlify admite un archivo por campo y 8 MB por envío en total.
+---
+
+<Base
+  title="Escribe para el blog"
+  description="Envía tu artículo de divulgación científica al equipo editorial de AstroCiencias Ecuador."
+>
+  <section class="contenedor encabezado">
+    <p class="etiqueta">// Colabora · Escribe</p>
+    <h1>Escribe para el blog de ACE</h1>
+    <p class="entradilla">
+      Si te apasiona la ciencia y quieres contarla, envíanos tu artículo. El equipo
+      editorial lo revisará y te escribirá antes de publicarlo.
+    </p>
+    <p class="nota">[Pautas de estilo y extensión recomendada para los artículos.]</p>
+  </section>
+
+  <section class="contenedor cuerpo">
+    <form
+      name="articulo-colaborador"
+      method="POST"
+      action="/colabora/escribe/gracias"
+      enctype="multipart/form-data"
+      data-netlify="true"
+      netlify-honeypot="sitio-web"
+      class="formulario"
+    >
+      <input type="hidden" name="form-name" value="articulo-colaborador" />
+      <p class="oculto">
+        <label>No rellenes este campo: <input name="sitio-web" tabindex="-1" autocomplete="off" /></label>
+      </p>
+
+      <fieldset>
+        <legend>Sobre ti</legend>
+        <div class="fila">
+          <div class="campo">
+            <label for="nombre">Nombre y apellidos</label>
+            <input id="nombre" name="nombre" type="text" required autocomplete="name" />
+          </div>
+          <div class="campo">
+            <label for="correo">Correo electrónico</label>
+            <input id="correo" name="correo" type="email" required autocomplete="email" />
+            <span class="ayuda">Solo lo usaremos para hablar contigo sobre el artículo.</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Tu artículo</legend>
+        <div class="campo">
+          <label for="area">Área</label>
+          <select id="area" name="area" required>
+            <option value="" disabled selected>Elige un área</option>
+            {AREAS.map((a) => <option value={a}>{a}</option>)}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="titulo">Título</label>
+          <input id="titulo" name="titulo" type="text" required maxlength="160" />
+        </div>
+        <div class="campo">
+          <label for="texto">Texto</label>
+          <textarea id="texto" name="texto" rows="16" required></textarea>
+          <span class="ayuda">
+            Pega aquí el texto completo. Si lo prefieres, adjúntalo como documento y
+            escribe aquí un resumen.
+          </span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Adjuntos (opcional)</legend>
+        <p class="ayuda">
+          Documento o imágenes con su fuente o autoría. Un archivo por campo; en total,
+          hasta 8 MB.
+        </p>
+        <div class="fila">
+          <div class="campo">
+            <label for="adjunto-1">Documento o imagen 1</label>
+            <input
+              id="adjunto-1"
+              name="adjunto-1"
+              type="file"
+              accept=".doc,.docx,.odt,.pdf,.md,.txt,image/jpeg,image/png,image/webp"
+            />
+          </div>
+          <div class="campo">
+            <label for="adjunto-2">Documento o imagen 2</label>
+            <input
+              id="adjunto-2"
+              name="adjunto-2"
+              type="file"
+              accept=".doc,.docx,.odt,.pdf,.md,.txt,image/jpeg,image/png,image/webp"
+            />
+          </div>
+        </div>
+        <p class="error" id="error-adjuntos" role="alert" hidden>
+          Los adjuntos superan los 8 MB. Reduce el tamaño de las imágenes o envía menos archivos.
+        </p>
+      </fieldset>
+
+      <label class="casilla">
+        <input type="checkbox" name="acepto-revision" required />
+        <span>
+          Acepto que el equipo editorial de ACE revise y edite mi texto antes de publicarlo,
+          y confirmo que es original o que tengo permiso para publicarlo.
+        </span>
+      </label>
+
+      <div class="acciones">
+        <button type="submit" class="boton boton-principal">Enviar artículo</button>
+      </div>
+    </form>
+  </section>
+</Base>
+
+<script>
+  // Avisa antes de enviar si los adjuntos superan el límite de Netlify (8 MB).
+  const LIMITE = 8 * 1024 * 1024;
+  const form = document.querySelector<HTMLFormElement>('form[name="articulo-colaborador"]');
+  const error = document.getElementById("error-adjuntos");
+
+  form?.addEventListener("submit", (evento) => {
+    const total = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'))
+      .flatMap((campo) => Array.from(campo.files ?? []))
+      .reduce((suma, archivo) => suma + archivo.size, 0);
+    if (total > LIMITE) {
+      evento.preventDefault();
+      if (error) {
+        error.hidden = false;
+        error.scrollIntoView({ block: "center" });
+      }
+    } else if (error) {
+      error.hidden = true;
+    }
+  });
+</script>
+
+<style>
+  .encabezado {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 72px 40px;
+    max-width: 840px;
+  }
+
+  h1 {
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .entradilla {
+    font-size: 19px;
+    color: var(--texto-suave);
+  }
+
+  .nota {
+    color: var(--texto-tenue);
+    font-size: 15px;
+  }
+
+  .cuerpo {
+    max-width: 840px;
+    padding-bottom: var(--space-24);
+  }
+
+  .formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-lg);
+    padding: clamp(20px, 4vw, 40px);
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  legend {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dorado);
+    padding: 0;
+    margin-bottom: var(--space-4);
+  }
+
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .fila > .campo {
+    flex: 1 1 260px;
+  }
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--cosmos);
+    color: var(--texto);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 16px;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--azul);
+  }
+
+  input[type="file"] {
+    font: inherit;
+    font-size: 15px;
+    color: var(--texto-suave);
+    padding: 10px 0;
+  }
+
+  input[type="file"]::file-selector-button {
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--texto);
+    background: var(--cosmos-3);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    margin-right: 12px;
+    cursor: pointer;
+  }
+
+  .ayuda {
+    font-size: 14px;
+    color: var(--texto-tenue);
+  }
+
+  .error {
+    font-size: 15px;
+    color: var(--error);
+  }
+
+  .casilla {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-weight: 400;
+    color: var(--texto-suave);
+  }
+
+  .casilla input {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin-top: 3px;
+    accent-color: var(--azul);
+  }
+
+  .acciones {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .acciones .boton {
+    border: 0;
+    cursor: pointer;
+  }
+
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+// Sustituye los "#" por los enlaces reales de las redes de ACE.
+const redes = [
+  { nombre: "Instagram", href: "#" },
+  { nombre: "Facebook", href: "#" },
+  { nombre: "TikTok", href: "#" },
+  { nombre: "YouTube", href: "#" },
+  { nombre: "LinkedIn", href: "#" },
+  { nombre: "X", href: "#" },
+];
+---
+
+<footer class="pie">
+  <div class="contenedor fila">
+    <div class="marca">
+      <div class="logos">
+        <img src="/escudo.png" alt="" width="44" height="49" />
+        <img
+          src="/logotipo-blanco.png"
+          alt="AstroCiencias Ecuador"
+          class="logotipo"
+          width="63"
+          height="36"
+        />
+      </div>
+      <span class="lema">Astronomía y más ciencias · desde 2012</span>
+    </div>
+
+    <nav aria-label="Redes sociales" class="redes">
+      {redes.map((r) => <a href={r.href}>{r.nombre}</a>)}
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    border-top: 1px solid var(--linea);
+    background: #040e19;
+  }
+
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 32px;
+    padding-block: var(--space-12);
+  }
+
+  .marca {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .logos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logotipo {
+    height: 36px;
+    width: auto;
+  }
+
+  .lema {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--texto-tenue);
+  }
+
+  .redes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 24px;
+    font-size: 15px;
+  }
+
+  .redes a {
+    color: var(--texto);
+    padding: 10px 0;
+  }
+
+  .redes a:hover {
+    color: var(--azul-hover);
+  }
+</style>

@@ -1,0 +1,45 @@
+---
+import Base from "../../../layouts/Base.astro";
+---
+
+<Base title="Artículo recibido">
+  <section class="contenedor aviso">
+    <p class="etiqueta">// Recibido</p>
+    <h1>Gracias, hemos recibido tu artículo</h1>
+    <p>
+      El equipo editorial lo revisará y te escribirá al correo que nos diste antes de
+      publicarlo.
+    </p>
+    <div class="botones">
+      <a href="/blog" class="boton boton-principal">Leer el blog</a>
+      <a href="/" class="boton boton-secundario">Volver al inicio</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .aviso {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 120px;
+    max-width: 720px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 44px);
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--texto-suave);
+    font-size: 19px;
+  }
+
+  .botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: var(--space-2);
+  }
+</style>

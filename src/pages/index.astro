@@ -1,16 +1,136 @@
 ---
+import Base from "../layouts/Base.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base>
+  <section class="heroe" id="inicio">
+    <div class="contenedor fila">
+      <div class="texto">
+        <p class="etiqueta">// Divulgación científica desde 2012</p>
+        <h1>Explorando ciencia y tecnología desde el cosmos</h1>
+        <p class="entradilla">
+          Astronomía y más ciencias desde Ecuador: artículos, charlas en vivo,
+          observaciones, radio, podcast y una revista para todo el mundo.
+        </p>
+        <div class="botones">
+          <a href="/blog" class="boton boton-principal">Leer el blog</a>
+          <a href="/#colabora" class="boton boton-secundario">Únete como voluntario</a>
+        </div>
+        <div class="coordenadas">
+          <span>LAT 0°13′S</span><span>LON 78°31′O</span><span>QUITO · ECUADOR</span>
+        </div>
+      </div>
+
+      <div class="visual">
+        <svg aria-hidden="true" viewBox="0 0 420 420">
+          <circle cx="210" cy="210" r="200" fill="none" stroke="#1c3954" />
+          <circle cx="210" cy="210" r="160" fill="none" stroke="#2f5677" stroke-dasharray="3 6" />
+          <circle cx="210" cy="210" r="118" fill="none" stroke="#c6b99b" opacity="0.6" />
+          <circle cx="410" cy="210" r="6" fill="#4fa3cf" />
+          <circle cx="97" cy="97" r="4" fill="#c6b99b" />
+          <circle cx="292" cy="327" r="5" fill="#eef2f6" />
+          <path d="M10 210H40M380 210H410M210 10V40M210 380V410" stroke="#2f5677" />
+        </svg>
+        <img
+          src="/escudo.png"
+          alt="Escudo de AstroCiencias Ecuador: un telescopio sobre un cielo estrellado rodeado de símbolos de las ciencias"
+          width="201"
+          height="223"
+        />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .heroe {
+    position: relative;
+    overflow: hidden;
+    background-image:
+      linear-gradient(var(--linea) 1px, transparent 1px),
+      linear-gradient(90deg, var(--linea) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-color: var(--cosmos);
+  }
+
+  /* Suaviza la cuadrícula para que no compita con el texto */
+  .heroe::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--cosmos);
+    opacity: 0.65;
+  }
+
+  .fila {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-12);
+    padding-block: 88px 96px;
+  }
+
+  .texto {
+    flex: 999 1 540px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  h1 {
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    max-width: 700px;
+  }
+
+  .entradilla {
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--texto-suave);
+    max-width: 560px;
+  }
+
+  .botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .coordenadas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--texto-tenue);
+  }
+
+  .visual {
+    flex: 1 1 320px;
+    position: relative;
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+    margin-inline: auto;
+  }
+
+  .visual svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .visual img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 46%;
+    transform: translate(-50%, -50%);
+  }
+</style>

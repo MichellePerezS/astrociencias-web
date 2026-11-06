@@ -1,0 +1,104 @@
+---
+// Suscripción al boletín con Netlify Forms: los correos aparecen en
+// el panel de Netlify, sección «Forms», formulario «boletin».
+---
+
+<section class="boletin">
+  <div class="interior">
+    <div class="texto">
+      <h2>Recibe los próximos artículos</h2>
+      <p>Un correo al mes con eventos y novedades científicas.</p>
+    </div>
+    <form name="boletin" method="POST" data-netlify="true" netlify-honeypot="sitio-web">
+      <input type="hidden" name="form-name" value="boletin" />
+      <p class="oculto">
+        <label>No rellenes este campo: <input name="sitio-web" tabindex="-1" autocomplete="off" /></label>
+      </p>
+      <label for="correo-boletin" class="oculto">Correo electrónico</label>
+      <input
+        id="correo-boletin"
+        name="correo"
+        type="email"
+        required
+        autocomplete="email"
+        placeholder="tu@correo.com"
+      />
+      <button type="submit">Suscribirme</button>
+    </form>
+  </div>
+</section>
+
+<style>
+  .boletin {
+    background: var(--cosmos-3);
+    color: var(--texto);
+  }
+
+  .interior {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--space-12) var(--space-6);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .texto {
+    flex: 999 1 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: 24px;
+  }
+
+  .texto p {
+    color: var(--texto-suave);
+  }
+
+  form {
+    flex: 1 1 320px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  input[type="email"] {
+    flex: 1 1 200px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--dorado);
+    font-size: 16px;
+    font-family: inherit;
+  }
+
+  button {
+    background: var(--dorado);
+    color: var(--cosmos-3);
+    border: 0;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #d9cdb0;
+  }
+
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+</style>

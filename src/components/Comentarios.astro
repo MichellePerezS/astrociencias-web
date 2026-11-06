@@ -1,0 +1,68 @@
+---
+// Comentarios con Cusdis (https://cusdis.com).
+// Para activarlos, crea el sitio en Cusdis y define PUBLIC_CUSDIS_APP_ID
+// en un archivo .env y en las variables de entorno de Netlify.
+interface Props {
+  id: string;
+  titulo: string;
+}
+
+const { id, titulo } = Astro.props;
+const appId = import.meta.env.PUBLIC_CUSDIS_APP_ID;
+const url = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+---
+
+<section class="comentarios" aria-labelledby="comentarios">
+  <h2 id="comentarios">Comentarios</h2>
+
+  {
+    appId ? (
+      <>
+        <div
+          id="cusdis_thread"
+          data-host="https://cusdis.com"
+          data-app-id={appId}
+          data-page-id={id}
+          data-page-url={url}
+          data-page-title={titulo}
+          data-theme="light"
+        />
+        <script is:inline async defer src="https://cusdis.com/js/cusdis.es.js" />
+        <script is:inline async defer src="https://cusdis.com/js/widget/lang/es.js" />
+        <p class="nota">Los comentarios se revisan antes de publicarse.</p>
+      </>
+    ) : (
+      <p class="pendiente">
+        [Los comentarios se activarán al configurar Cusdis.]
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .comentarios {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    border-top: 1px solid var(--borde-claro);
+    padding-top: 32px;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: 26px;
+  }
+
+  .nota,
+  .pendiente {
+    font-size: 14px;
+    color: var(--tinta-tenue);
+  }
+
+  .pendiente {
+    background: var(--cielo-suave);
+    border: 1px solid var(--cielo);
+    border-radius: var(--radius-md);
+    padding: 20px;
+  }
+</style>

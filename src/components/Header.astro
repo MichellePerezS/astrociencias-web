@@ -1,0 +1,101 @@
+---
+const enlaces = [
+  { texto: "Quiénes somos", href: "/#nosotros" },
+  { texto: "Blog", href: "/blog" },
+  { texto: "Eventos", href: "/#eventos" },
+  { texto: "Recursos", href: "/#recursos" },
+];
+
+const ruta = Astro.url.pathname;
+const actual = (href: string) =>
+  !href.includes("#") && (ruta === href || ruta.startsWith(`${href}/`)) ? "page" : undefined;
+---
+
+<header class="cabecera">
+  <div class="contenedor fila">
+    <a href="/" class="marca" aria-label="AstroCiencias Ecuador, inicio">
+      <img src="/escudo.png" alt="" width="48" height="53" />
+      <img
+        src="/logotipo-blanco.png"
+        alt="AstroCiencias Ecuador"
+        class="logotipo"
+        width="70"
+        height="40"
+      />
+    </a>
+
+    <nav aria-label="Principal" class="menu">
+      {enlaces.map((e) => <a href={e.href} aria-current={actual(e.href)}>{e.texto}</a>)}
+      <a href="/#colabora" class="colabora">Colabora</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .cabecera {
+    border-bottom: 1px solid var(--linea);
+    background: var(--cosmos);
+  }
+
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: 14px;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .marca img {
+    object-fit: contain;
+  }
+
+  .logotipo {
+    height: 40px;
+    width: auto;
+  }
+
+  .menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 28px;
+    font-family: var(--font-titulos);
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .menu a {
+    color: var(--texto);
+    text-decoration: none;
+    padding: 10px 0;
+  }
+
+  .menu a:hover {
+    color: var(--azul-hover);
+  }
+
+  .menu a[aria-current="page"] {
+    color: var(--dorado);
+  }
+
+  .menu .colabora {
+    color: var(--cosmos);
+    background: var(--dorado);
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+  }
+
+  .menu .colabora:hover {
+    color: var(--cosmos);
+    background: #d9cdb0;
+  }
+</style>
