@@ -2,8 +2,7 @@ import { config, collection, fields } from "@keystatic/core";
 import { AREAS } from "./src/content/areas";
 
 // Proyecto de Keystatic Cloud con el formato «equipo/proyecto».
-// Sustitúyelo por el que aparece en https://keystatic.cloud al crear el proyecto.
-const PROYECTO_CLOUD = "[equipo]/[proyecto]";
+const PROYECTO_CLOUD = "astrociencias/astrociencias-web";
 
 export default config({
   // En local se edita directamente en los archivos; en producción, con Keystatic Cloud.
