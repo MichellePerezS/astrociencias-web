@@ -6,7 +6,7 @@ descripcion: >-
 fecha: 2026-11-07
 area: Astronomía y astrofísica
 autor: michelle-perez
-borrador: true
+borrador: false
 ---
 Cada diciembre, la Tierra atraviesa los restos que deja a su paso el asteroide 3200 Faetón. Esos pequeños fragmentos entran en la atmósfera a unos 35 km/s y se encienden como estrellas fugaces: son las Gemínidas, una de las lluvias de meteoros más intensas del año.
 
