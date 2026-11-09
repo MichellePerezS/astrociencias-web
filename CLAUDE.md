@@ -18,6 +18,12 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - `src/content/autores/`: un `.yaml` por autor; los artículos lo citan en `autor` por su nombre de archivo.
 - `src/content/areas.ts`: lista única de áreas, compartida por el esquema, Keystatic y los formularios.
 - Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/colabora/escribe` (y su `/gracias`).
+- Editor propio (en construcción por fases, independiente de Keystatic): zona privada `/escribir`, acceso en `/escribir/entrar`.
+  - Login con Netlify Identity, solo por invitación (`gotrue-js` en el navegador).
+  - Roles en `app_metadata.roles`: `editor` (ve todo) o `autor` + `autor:<slug>` (ve los artículos de `src/content/autores/<slug>.yaml`).
+  - El servidor valida el token contra Identity en cada petición (`src/middleware.ts`, `src/lib/identidad.ts`); el navegador lo entrega en `/api/sesion` y se guarda en la cookie HttpOnly `ace_sesion`.
+  - Toda página nueva bajo `/escribir` debe llevar `export const prerender = false`.
+  - Plantillas de correo de Identity en `public/identity/`. En local, `IDENTITY_URL` y `PUBLIC_IDENTITY_URL` apuntan a la Identity del sitio publicado.
 - `public/`: escudo.png y logotipo-blanco.png; Keystatic guarda las imágenes en `public/images/blog/` y `public/images/autores/`.
 
 ## Diseño

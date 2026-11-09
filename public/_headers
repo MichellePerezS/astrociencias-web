@@ -1,0 +1,5 @@
+# Zona privada del editor y plantillas de correo: fuera de los buscadores.
+/escribir/*
+  X-Robots-Tag: noindex
+/identity/*
+  X-Robots-Tag: noindex

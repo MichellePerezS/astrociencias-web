@@ -1,0 +1,362 @@
+---
+import Base from "../../layouts/Base.astro";
+
+// Página estática: todo el inicio de sesión ocurre en el navegador con
+// Netlify Identity; el servidor solo recibe el token en /api/sesion.
+// También atiende los enlaces de los correos de invitación y de
+// recuperación de contraseña (#invite_token=… y #recovery_token=…).
+---
+
+<Base title="Entrar" description="Acceso del equipo editorial de AstroCiencias Ecuador.">
+  <section class="contenedor acceso">
+    <p class="etiqueta">// Zona privada</p>
+    <h1 id="titulo">Entrar para escribir</h1>
+
+    <p class="mensaje" id="mensaje" role="status" aria-live="polite" hidden></p>
+
+    <!-- Inicio de sesión -->
+    <form id="form-entrar" class="tarjeta" hidden>
+      <div class="campo">
+        <label for="entrar-correo">Correo electrónico</label>
+        <input id="entrar-correo" name="correo" type="email" required autocomplete="username" />
+      </div>
+      <div class="campo">
+        <label for="entrar-clave">Contraseña</label>
+        <input id="entrar-clave" name="clave" type="password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="boton boton-principal">Entrar</button>
+      <button type="button" class="enlace" id="ir-recuperar">¿Has olvidado tu contraseña?</button>
+      <p class="ayuda">El acceso es solo por invitación del equipo editorial.</p>
+    </form>
+
+    <!-- Pedir correo de recuperación -->
+    <form id="form-recuperar" class="tarjeta" hidden>
+      <p>Te enviaremos un enlace para crear una contraseña nueva.</p>
+      <div class="campo">
+        <label for="recuperar-correo">Correo electrónico</label>
+        <input id="recuperar-correo" name="correo" type="email" required autocomplete="email" />
+      </div>
+      <button type="submit" class="boton boton-principal">Enviar enlace</button>
+      <button type="button" class="enlace" id="ir-entrar">Volver a entrar</button>
+    </form>
+
+    <!-- Crear contraseña (invitación) o cambiarla (recuperación) -->
+    <form id="form-clave" class="tarjeta" hidden>
+      <p id="texto-clave"></p>
+      <div class="campo">
+        <label for="clave-nueva">Contraseña nueva</label>
+        <input id="clave-nueva" name="clave" type="password" required minlength="10" autocomplete="new-password" />
+        <span class="ayuda">Al menos 10 caracteres.</span>
+      </div>
+      <div class="campo">
+        <label for="clave-repetida">Repite la contraseña</label>
+        <input id="clave-repetida" name="repetida" type="password" required minlength="10" autocomplete="new-password" />
+      </div>
+      <button type="submit" class="boton boton-principal">Guardar y entrar</button>
+    </form>
+  </section>
+</Base>
+
+<script>
+  import GoTrue, { type User } from "gotrue-js";
+
+  const auth = new GoTrue({
+    APIUrl: import.meta.env.PUBLIC_IDENTITY_URL || "/.netlify/identity",
+    setCookie: false,
+  });
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const titulo = $("titulo");
+  const mensaje = $("mensaje");
+  const formEntrar = $<HTMLFormElement>("form-entrar");
+  const formRecuperar = $<HTMLFormElement>("form-recuperar");
+  const formClave = $<HTMLFormElement>("form-clave");
+  const textoClave = $("texto-clave");
+
+  const params = new URLSearchParams(location.search);
+  // Solo se vuelve a páginas de la zona privada (evita redirecciones abiertas).
+  const pedida = params.get("volver") ?? "";
+  const volver = /^\/escribir(\/|\?|$)/.test(pedida) ? pedida : "/escribir";
+
+  function avisar(texto: string, tipo: "info" | "error" = "info") {
+    mensaje.textContent = texto;
+    mensaje.dataset.tipo = tipo;
+    mensaje.hidden = !texto;
+  }
+
+  function mostrar(form: HTMLFormElement | null) {
+    for (const f of [formEntrar, formRecuperar, formClave]) f.hidden = f !== form;
+    form?.querySelector<HTMLInputElement>("input:not([type=hidden])")?.focus();
+  }
+
+  function ocupado(form: HTMLFormElement, si: boolean) {
+    form.querySelectorAll("button, input").forEach((el) => {
+      (el as HTMLButtonElement).disabled = si;
+    });
+  }
+
+  /** Envía el token al servidor, que lo valida y comprueba el rol. */
+  async function abrirSesion(usuario: User) {
+    const token = await usuario.jwt(true);
+    const r = await fetch("/api/sesion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    if (r.ok) {
+      location.replace(volver);
+      return;
+    }
+    await usuario.logout().catch(() => {});
+    mostrar(formEntrar);
+    avisar(
+      r.status === 403
+        ? "Tu cuenta existe, pero todavía no tiene un rol asignado (autor o editor). Pide a un editor que te lo asigne."
+        : "No se ha podido abrir la sesión. Inténtalo de nuevo.",
+      "error",
+    );
+  }
+
+  function errorDe(e: unknown): string {
+    const texto = String((e as { json?: { error_description?: string; msg?: string } })?.json?.error_description
+      ?? (e as { json?: { msg?: string } })?.json?.msg
+      ?? (e as Error)?.message
+      ?? "");
+    if (/invalid|grant/i.test(texto)) return "Correo o contraseña incorrectos.";
+    if (/expired|not found|token/i.test(texto)) return "El enlace ha caducado o ya se usó. Pide uno nuevo.";
+    return "Algo ha fallado. Inténtalo de nuevo en unos minutos.";
+  }
+
+  async function iniciar() {
+    const hash = new URLSearchParams(location.hash.slice(1));
+    const invitacion = hash.get("invite_token");
+    const recuperacion = hash.get("recovery_token");
+    if (invitacion || recuperacion) history.replaceState(null, "", location.pathname + location.search);
+
+    // Cerrar sesión
+    if (params.has("salir")) {
+      await fetch("/api/sesion", { method: "DELETE" }).catch(() => {});
+      await auth.currentUser()?.logout().catch(() => {});
+      history.replaceState(null, "", location.pathname);
+      mostrar(formEntrar);
+      avisar("Has cerrado la sesión.");
+      return;
+    }
+
+    // Invitación: crear contraseña
+    if (invitacion) {
+      titulo.textContent = "Te damos la bienvenida";
+      textoClave.textContent = "Crea tu contraseña para entrar en la zona de escritura de ACE.";
+      mostrar(formClave);
+      formClave.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!clavesIguales()) return;
+        ocupado(formClave, true);
+        try {
+          const usuario = await auth.acceptInvite(invitacion, valor("clave-nueva"), true);
+          await abrirSesion(usuario);
+        } catch (err) {
+          avisar(errorDe(err), "error");
+        } finally {
+          ocupado(formClave, false);
+        }
+      };
+      return;
+    }
+
+    // Recuperación: entrar con el enlace y cambiar la contraseña
+    if (recuperacion) {
+      try {
+        const usuario = await auth.recover(recuperacion, true);
+        titulo.textContent = "Contraseña nueva";
+        textoClave.textContent = `Elige una contraseña nueva para ${usuario.email}.`;
+        mostrar(formClave);
+        formClave.onsubmit = async (e) => {
+          e.preventDefault();
+          if (!clavesIguales()) return;
+          ocupado(formClave, true);
+          try {
+            await usuario.update({ password: valor("clave-nueva") });
+            await abrirSesion(usuario);
+          } catch (err) {
+            avisar(errorDe(err), "error");
+          } finally {
+            ocupado(formClave, false);
+          }
+        };
+      } catch (err) {
+        mostrar(formEntrar);
+        avisar(errorDe(err), "error");
+      }
+      return;
+    }
+
+    // Ya había sesión en este navegador: renovar el token y volver.
+    const actual = auth.currentUser();
+    if (actual) {
+      try {
+        await abrirSesion(actual);
+        return;
+      } catch {
+        await actual.logout().catch(() => {});
+      }
+    }
+
+    mostrar(formEntrar);
+    if (params.get("motivo") === "sesion") avisar("Tu sesión ha caducado. Vuelve a entrar.");
+  }
+
+  function valor(id: string) {
+    return $<HTMLInputElement>(id).value;
+  }
+
+  function clavesIguales() {
+    if (valor("clave-nueva") !== valor("clave-repetida")) {
+      avisar("Las dos contraseñas no coinciden.", "error");
+      return false;
+    }
+    return true;
+  }
+
+  formEntrar.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    avisar("");
+    ocupado(formEntrar, true);
+    try {
+      const usuario = await auth.login(valor("entrar-correo"), valor("entrar-clave"), true);
+      await abrirSesion(usuario);
+    } catch (err) {
+      avisar(errorDe(err), "error");
+    } finally {
+      ocupado(formEntrar, false);
+    }
+  });
+
+  formRecuperar.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    ocupado(formRecuperar, true);
+    try {
+      await auth.requestPasswordRecovery(valor("recuperar-correo"));
+    } catch {
+      // No revelamos si el correo existe.
+    } finally {
+      ocupado(formRecuperar, false);
+    }
+    mostrar(formEntrar);
+    avisar("Si ese correo tiene cuenta, recibirás un enlace en unos minutos.");
+  });
+
+  $("ir-recuperar").addEventListener("click", () => {
+    avisar("");
+    mostrar(formRecuperar);
+  });
+  $("ir-entrar").addEventListener("click", () => {
+    avisar("");
+    mostrar(formEntrar);
+  });
+
+  iniciar();
+</script>
+
+<style>
+  .acceso {
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 80px var(--space-24);
+  }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 40px);
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+  }
+
+  .tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-lg);
+    padding: clamp(20px, 4vw, 32px);
+  }
+
+  .tarjeta[hidden] {
+    display: none;
+  }
+
+  .tarjeta p {
+    color: var(--texto-suave);
+  }
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--cosmos);
+    color: var(--texto);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 16px;
+  }
+
+  input:focus {
+    border-color: var(--azul);
+  }
+
+  .boton {
+    border: 0;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .enlace {
+    align-self: flex-start;
+    background: none;
+    border: 0;
+    padding: 6px 0;
+    color: var(--azul);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .enlace:hover {
+    color: var(--azul-hover);
+  }
+
+  .ayuda {
+    font-size: 14px;
+    color: var(--texto-tenue);
+  }
+
+  .mensaje {
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    border: 1px solid var(--linea-fuerte);
+    background: var(--cosmos-2);
+  }
+
+  .mensaje[data-tipo="error"] {
+    border-color: var(--error);
+    color: var(--error);
+  }
+</style>

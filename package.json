@@ -17,6 +17,7 @@
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
     "astro": "^7.4.5",
+    "gotrue-js": "^1.0.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
