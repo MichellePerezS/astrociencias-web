@@ -21,6 +21,16 @@ const tituloCompleto =
 <html lang="es">
   <head>
     <meta charset="utf-8" />
+    <!-- Los correos de Netlify Identity enlazan a la portada con el token en el
+         hash: se lleva a /escribir/entrar, que es quien lo procesa. -->
+    <script is:inline>
+      if (
+        /^#(invite|recovery|confirmation)_token=/.test(location.hash) &&
+        location.pathname.replace(/\/$/, "") !== "/escribir/entrar"
+      ) {
+        location.replace("/escribir/entrar" + location.hash);
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{tituloCompleto}</title>
     <meta name="description" content={description} />

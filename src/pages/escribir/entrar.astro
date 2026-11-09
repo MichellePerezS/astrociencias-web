@@ -3,8 +3,9 @@ import Base from "../../layouts/Base.astro";
 
 // Página estática: todo el inicio de sesión ocurre en el navegador con
 // Netlify Identity; el servidor solo recibe el token en /api/sesion.
-// También atiende los enlaces de los correos de invitación y de
-// recuperación de contraseña (#invite_token=… y #recovery_token=…).
+// También atiende los enlaces de los correos de Netlify Identity
+// (#invite_token=…, #recovery_token=… y #confirmation_token=…). Los correos
+// por defecto apuntan a la portada; el script de Base.astro los trae aquí.
 ---
 
 <Base title="Entrar" description="Acceso del equipo editorial de AstroCiencias Ecuador.">
@@ -131,7 +132,23 @@ import Base from "../../layouts/Base.astro";
     const hash = new URLSearchParams(location.hash.slice(1));
     const invitacion = hash.get("invite_token");
     const recuperacion = hash.get("recovery_token");
-    if (invitacion || recuperacion) history.replaceState(null, "", location.pathname + location.search);
+    const confirmacion = hash.get("confirmation_token");
+    // Quita el token de la barra de direcciones y del historial.
+    if (invitacion || recuperacion || confirmacion) {
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+
+    // Confirmación de correo: activa la cuenta y abre la sesión.
+    if (confirmacion) {
+      try {
+        const usuario = await auth.confirm(confirmacion, true);
+        await abrirSesion(usuario);
+      } catch (err) {
+        mostrar(formEntrar);
+        avisar(errorDe(err), "error");
+      }
+      return;
+    }
 
     // Cerrar sesión
     if (params.has("salir")) {
