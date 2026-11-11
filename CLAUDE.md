@@ -23,6 +23,11 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
   - Roles en `app_metadata.roles`: `editor` (ve todo) o `autor` + `autor:<slug>` (ve los artículos de `src/content/autores/<slug>.yaml`).
   - El servidor valida el token contra Identity en cada petición (`src/middleware.ts`, `src/lib/identidad.ts`); el navegador lo entrega en `/api/sesion` y se guarda en la cookie HttpOnly `ace_sesion`.
   - Toda página nueva bajo `/escribir` debe llevar `export const prerender = false`.
+  - Fase 2: editor visual TipTap (isla React `src/components/editor/EditorArticulo.tsx`) en `/escribir/nuevo` y `/escribir/editar/[id]`, con guardado automático.
+    - Borradores en Netlify Blobs, tienda `editor-borradores` (clave = id); imágenes en `editor-imagenes` (`<id>/<uuid>.<ext>`). Lógica y permisos en `src/lib/borradores.ts`: el autor solo accede a lo que creó (`propietario.id`), el editor a todo; si no hay permiso se responde 404.
+    - API privada: `POST /api/borradores`, `PUT /api/borradores/[id]` (con `version` = ETag; si no coincide, 409), `POST /api/borradores/[id]/imagenes`, `GET /api/imagenes/[borrador]/[archivo]`. El middleware exige sesión y, en escrituras, mismo `Origin`.
+    - El HTML se limpia en el servidor con `src/lib/limpiar-html.ts` (solo p, h2, h3, strong, em, listas, a, blockquote e imágenes del propio borrador). Imágenes: JPG, PNG, WebP o GIF comprobados por sus bytes, máximo 4 MB (`src/lib/imagenes.ts`); SVG no.
+    - Nada se publica en GitHub todavía (fase 4).
   - Correos de Identity: se usan los de por defecto (las plantillas propias exigen el plan Pro de Netlify). Enlazan a la portada con `#invite_token`, `#recovery_token` o `#confirmation_token`; un script mínimo en `Base.astro` redirige a `/escribir/entrar` conservando el hash, y esa página procesa los tres tokens. No quites ese script de Base.
   - En local, `IDENTITY_URL` y `PUBLIC_IDENTITY_URL` apuntan a la Identity del sitio publicado.
 - `public/`: escudo.png y logotipo-blanco.png; Keystatic guarda las imágenes en `public/images/blog/` y `public/images/autores/`.

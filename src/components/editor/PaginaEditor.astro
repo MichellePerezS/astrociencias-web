@@ -1,0 +1,51 @@
+---
+import Base from "../../layouts/Base.astro";
+import EditorArticulo, { type DatosIniciales } from "./EditorArticulo";
+
+interface Props {
+  titulo: string;
+  datos: DatosIniciales;
+  /** Aviso opcional sobre la hoja (p. ej. «Borrador de …» para editores). */
+  nota?: string;
+}
+
+const { titulo, datos, nota } = Astro.props;
+---
+
+<Base title={titulo} description="Editor de artículos de AstroCiencias Ecuador.">
+  <section class="contenedor marco">
+    <div class="cabecera">
+      <a href="/escribir" class="volver">← Volver a la lista</a>
+      <p class="etiqueta">// {titulo}</p>
+      {nota && <p class="nota">{nota}</p>}
+    </div>
+    <EditorArticulo client:only="react" inicial={datos} />
+  </section>
+</Base>
+
+<style>
+  .marco {
+    max-width: 920px;
+    padding-block: 32px var(--space-24);
+  }
+
+  .cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 24px;
+    margin-bottom: 8px;
+  }
+
+  .volver {
+    font-family: var(--font-titulos);
+    font-weight: 500;
+    font-size: 15px;
+    padding: 6px 0;
+  }
+
+  .nota {
+    color: var(--texto-suave);
+    font-size: 15px;
+  }
+</style>

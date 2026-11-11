@@ -1,0 +1,65 @@
+---
+import Base from "../../../layouts/Base.astro";
+import PaginaEditor from "../../../components/editor/PaginaEditor.astro";
+import { leerBorrador } from "../../../lib/borradores";
+
+export const prerender = false;
+
+const usuario = Astro.locals.usuario!;
+// leerBorrador comprueba el permiso: un autor solo obtiene sus borradores.
+// Si no existe o no es suyo, se responde igual (404) para no revelar nada.
+const encontrado = await leerBorrador(usuario, Astro.params.id ?? "");
+if (!encontrado) Astro.response.status = 404;
+
+const nota =
+  encontrado && encontrado.borrador.propietario.id !== usuario.id
+    ? `Borrador de ${encontrado.borrador.propietario.nombre}`
+    : undefined;
+---
+
+{
+  encontrado ? (
+    <PaginaEditor
+      titulo={encontrado.borrador.titulo || "Borrador sin título"}
+      nota={nota}
+      datos={{
+        id: encontrado.borrador.id,
+        version: encontrado.version,
+        titulo: encontrado.borrador.titulo,
+        resumen: encontrado.borrador.resumen,
+        area: encontrado.borrador.area,
+        imagen: encontrado.borrador.imagen,
+        imagenAlt: encontrado.borrador.imagenAlt,
+        contenido: encontrado.borrador.contenido,
+        actualizado: encontrado.borrador.actualizado,
+      }}
+    />
+  ) : (
+    <Base title="Borrador no encontrado">
+      <section class="contenedor no-encontrado">
+        <p class="etiqueta">// 404</p>
+        <h1>No encontramos este borrador</h1>
+        <p>Puede que se haya borrado o que no tengas acceso a él.</p>
+        <a href="/escribir" class="boton boton-principal">Volver a la lista</a>
+      </section>
+    </Base>
+  )
+}
+
+<style>
+  .no-encontrado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-block: 96px;
+  }
+
+  h1 {
+    font-size: clamp(30px, 5vw, 40px);
+  }
+
+  p {
+    color: var(--texto-suave);
+  }
+</style>

@@ -1,0 +1,22 @@
+---
+import PaginaEditor from "../../components/editor/PaginaEditor.astro";
+
+// El borrador se crea en el servidor con el primer cambio (no al abrir la
+// página), así no quedan borradores vacíos por visitas sin escribir nada.
+export const prerender = false;
+---
+
+<PaginaEditor
+  titulo="Nuevo artículo"
+  datos={{
+    id: null,
+    version: null,
+    titulo: "",
+    resumen: "",
+    area: null,
+    imagen: null,
+    imagenAlt: "",
+    contenido: "",
+    actualizado: null,
+  }}
+/>

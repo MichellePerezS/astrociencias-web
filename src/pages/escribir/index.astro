@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import { fechaCorta } from "../../lib/blog";
+import { listarBorradores } from "../../lib/borradores";
 
 // Página privada: se genera en el servidor en cada visita.
 // El middleware ya ha comprobado la sesión y el rol.
@@ -14,18 +15,53 @@ const autores = new Map(
   (await getCollection("autores")).map((a) => [a.id, a.data.nombre]),
 );
 
-// Incluye borradores: es la vista de trabajo del equipo.
-const todos = (await getCollection("blog")).sort(
-  (a, b) => b.data.fecha.getTime() - a.data.fecha.getTime(),
+// Artículos del repositorio (publicados y borradores de Keystatic).
+const delRepositorio = (await getCollection("blog")).filter(
+  (a) => esEditor || (usuario.autor !== null && a.data.autor.id === usuario.autor),
 );
-const articulos = esEditor
-  ? todos
-  : usuario.autor
-    ? todos.filter((a) => a.data.autor.id === usuario.autor)
-    : [];
+
+// Borradores del editor propio (Netlify Blobs), ya filtrados por permiso.
+const delEditor = await listarBorradores(usuario);
+
+type Estado = "edicion" | "borrador" | "publicado";
+interface Fila {
+  clave: string;
+  titulo: string;
+  href: string | null;
+  autor: string;
+  area: string;
+  fecha: Date;
+  estado: Estado;
+}
+
+const filas: Fila[] = [
+  ...delEditor.map((b) => ({
+    clave: `e-${b.id}`,
+    titulo: b.titulo || "Borrador sin título",
+    href: `/escribir/editar/${b.id}`,
+    autor: (b.autor && autores.get(b.autor)) || b.propietario.nombre,
+    area: b.area ?? "—",
+    fecha: new Date(b.actualizado),
+    estado: "edicion" as const,
+  })),
+  ...delRepositorio.map((a) => ({
+    clave: `r-${a.id}`,
+    titulo: a.data.titulo,
+    href: a.data.borrador ? null : `/blog/${a.id}`,
+    autor: autores.get(a.data.autor.id) ?? a.data.autor.id,
+    area: a.data.tema || a.data.area,
+    fecha: a.data.fecha,
+    estado: (a.data.borrador ? "borrador" : "publicado") as Estado,
+  })),
+].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+const ETIQUETAS: Record<Estado, string> = {
+  edicion: "En edición",
+  borrador: "Borrador",
+  publicado: "Publicado",
+};
 
 const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
-const borradores = articulos.filter((a) => a.data.borrador).length;
 ---
 
 <Base title="Escribir" description="Zona privada del equipo editorial de ACE.">
@@ -38,15 +74,19 @@ const borradores = articulos.filter((a) => a.data.borrador).length;
         {usuario.nombre !== usuario.correo && <span>({usuario.correo})</span>}
       </p>
     </div>
-    <a href="/escribir/entrar?salir=1" class="boton boton-secundario">Cerrar sesión</a>
+    <div class="acciones">
+      <a href="/escribir/nuevo" class="boton boton-principal">Nuevo artículo</a>
+      <a href="/escribir/entrar?salir=1" class="boton boton-secundario">Cerrar sesión</a>
+    </div>
   </section>
 
   <section class="contenedor cuerpo">
     {
       !esEditor && !usuario.autor && (
         <p class="aviso" role="status">
-          Tu cuenta todavía no está vinculada a una ficha de autor. Pide a un editor que
-          te asigne el rol <code>autor:&lt;tu-ficha&gt;</code> en Netlify.
+          Tu cuenta todavía no está vinculada a una ficha de autor, así que aquí solo ves los
+          borradores que escribas en este editor. Pide a un editor que te asigne el rol
+          <code>autor:&lt;tu-ficha&gt;</code> en Netlify.
         </p>
       )
     }
@@ -60,11 +100,11 @@ const borradores = articulos.filter((a) => a.data.borrador).length;
     }
 
     {
-      articulos.length > 0 && (
+      filas.length > 0 ? (
         <>
           <p class="resumen">
-            {articulos.length} {articulos.length === 1 ? "artículo" : "artículos"}
-            {borradores > 0 && ` · ${borradores} en borrador`}
+            {filas.length} {filas.length === 1 ? "artículo" : "artículos"}
+            {delEditor.length > 0 && ` · ${delEditor.length} en edición`}
           </p>
           <div class="tabla">
             <table>
@@ -78,35 +118,29 @@ const borradores = articulos.filter((a) => a.data.borrador).length;
                 </tr>
               </thead>
               <tbody>
-                {articulos.map((a) => (
+                {filas.map((f) => (
                   <tr>
-                    <td class="col-titulo">
-                      {a.data.borrador ? (
-                        a.data.titulo
-                      ) : (
-                        <a href={`/blog/${a.id}`}>{a.data.titulo}</a>
-                      )}
-                    </td>
-                    {esEditor && <td>{autores.get(a.data.autor.id) ?? a.data.autor.id}</td>}
-                    <td>{a.data.tema || a.data.area}</td>
-                    <td class="col-fecha">{fechaCorta(a.data.fecha)}</td>
+                    <td class="col-titulo">{f.href ? <a href={f.href}>{f.titulo}</a> : f.titulo}</td>
+                    {esEditor && <td>{f.autor}</td>}
+                    <td>{f.area}</td>
+                    <td class="col-fecha">{fechaCorta(f.fecha)}</td>
                     <td>
-                      <span class:list={["estado", a.data.borrador ? "borrador" : "publicado"]}>
-                        {a.data.borrador ? "Borrador" : "Publicado"}
-                      </span>
+                      <span class:list={["estado", f.estado]}>{ETIQUETAS[f.estado]}</span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <p class="leyenda">
+            <strong>En edición</strong>: borradores de este editor, sin publicar.
+            <strong>Borrador</strong>: artículos del repositorio marcados como borrador.
+          </p>
         </>
-      )
-    }
-
-    {
-      articulos.length === 0 && (esEditor || autorVinculado) && (
-        <p class="vacio">Todavía no hay artículos.</p>
+      ) : (
+        <p class="vacio">
+          Todavía no hay artículos. <a href="/escribir/nuevo">Empieza uno nuevo</a>.
+        </p>
       )
     }
   </section>
@@ -140,6 +174,12 @@ const borradores = articulos.filter((a) => a.data.borrador).length;
 
   .sesion span {
     color: var(--texto-tenue);
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .cuerpo {
@@ -219,6 +259,11 @@ const borradores = articulos.filter((a) => a.data.borrador).length;
     white-space: nowrap;
   }
 
+  .edicion {
+    color: var(--texto);
+    background: var(--cosmos-3);
+  }
+
   .borrador {
     color: var(--dorado);
   }
@@ -227,7 +272,14 @@ const borradores = articulos.filter((a) => a.data.borrador).length;
     color: var(--azul);
   }
 
+  .leyenda,
   .vacio {
+    color: var(--texto-tenue);
+    font-size: 14px;
+  }
+
+  .vacio {
+    font-size: 17px;
     color: var(--texto-suave);
   }
 </style>
