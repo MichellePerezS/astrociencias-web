@@ -29,7 +29,7 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
     - El HTML se limpia en el servidor con `src/lib/limpiar-html.ts` (solo p, h2, h3, strong, em, listas, a, blockquote e imágenes del propio borrador). Imágenes: JPG, PNG, WebP o GIF comprobados por sus bytes, máximo 4 MB (`src/lib/imagenes.ts`); SVG no.
     - Nada se publica en GitHub todavía (fase 4).
   - Correos de Identity: se usan los de por defecto (las plantillas propias exigen el plan Pro de Netlify). Enlazan a la portada con `#invite_token`, `#recovery_token` o `#confirmation_token`; un script mínimo en `Base.astro` redirige a `/escribir/entrar` conservando el hash, y esa página procesa los tres tokens. No quites ese script de Base.
-  - En local, `IDENTITY_URL` y `PUBLIC_IDENTITY_URL` apuntan a la Identity del sitio publicado.
+  - En local, `IDENTITY_URL` apunta a la Identity del sitio publicado y `PUBLIC_IDENTITY_URL=/identidad-dev`, un proxy de Vite (solo en `astro dev`, en `astro.config.mjs`) que reenvía a ella para evitar el error de CORS. En producción `PUBLIC_IDENTITY_URL` no se define y se usa `/.netlify/identity`.
 - `public/`: escudo.png y logotipo-blanco.png; Keystatic guarda las imágenes en `public/images/blog/` y `public/images/autores/`.
 
 ## Diseño
