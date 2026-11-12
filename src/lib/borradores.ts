@@ -56,12 +56,38 @@ export function puedeAcceder(usuario: Usuario, borrador: Borrador): boolean {
  * devuelve null en ambos casos, para no revelar qué borradores existen.
  */
 export async function leerBorrador(usuario: Usuario, id: string): Promise<BorradorConVersion | null> {
-  if (!esIdValido(id)) return null;
-  const entrada = await tiendaBorradores().getWithMetadata(id, { type: "json" });
-  if (!entrada?.data || !entrada.etag) return null;
+  if (!esIdValido(id)) return noEncontrado(id, "id no válido");
+  const tienda = tiendaBorradores();
+  const entrada = await tienda.getWithMetadata(id, { type: "json" });
+  if (!entrada?.data) return noEncontrado(id, "no existe en la tienda");
+  const etag = entrada.etag ?? (await etagEmulado(tienda, id));
+  if (!etag) return noEncontrado(id, "Blobs no devolvió ETag");
   const borrador = entrada.data as Borrador;
-  if (!puedeAcceder(usuario, borrador)) return null;
-  return { borrador, version: entrada.etag };
+  if (!puedeAcceder(usuario, borrador)) {
+    return noEncontrado(
+      id,
+      `sin permiso (rol ${usuario.rol}, usuario ${usuario.id}, propietario ${borrador.propietario.id})`,
+    );
+  }
+  return { borrador, version: etag };
+}
+
+/** Solo en `astro dev`: explica en la terminal por qué un borrador da 404. */
+function noEncontrado(id: string, motivo: string): null {
+  if (import.meta.env.DEV) console.warn(`[borradores] 404 para ${id}: ${motivo}`);
+  return null;
+}
+
+/**
+ * Solo en `astro dev`: el emulador local de Blobs no envía ETag al leer
+ * (sí al escribir y al listar), así que se toma del listado. Es el mismo
+ * ETag que el emulador compara en `onlyIfMatch`. En producción Blobs
+ * siempre lo envía y, si faltara, el borrador no se considera válido.
+ */
+async function etagEmulado(tienda: ReturnType<typeof tiendaBorradores>, id: string) {
+  if (!import.meta.env.DEV) return undefined;
+  const { blobs } = await tienda.list({ prefix: id });
+  return blobs.find((b) => b.key === id)?.etag || undefined;
 }
 
 export async function crearBorrador(usuario: Usuario): Promise<BorradorConVersion> {
