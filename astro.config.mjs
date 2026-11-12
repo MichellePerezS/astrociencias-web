@@ -9,5 +9,9 @@ import netlify from "@astrojs/netlify";
 // (/keystatic y /api/keystatic) se ejecuta en una función de Netlify.
 export default defineConfig({
   integrations: [react(), keystatic()],
-  adapter: netlify(),
+  adapter: netlify({
+    // Solo afecta a `astro dev`. No usamos Edge Functions y su emulación
+    // descarga Deno, que falla. Blobs sigue emulado (no depende de esto).
+    devFeatures: { edgeFunctions: false, images: true, environmentVariables: false },
+  }),
 });

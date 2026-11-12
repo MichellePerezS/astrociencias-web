@@ -50,6 +50,7 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 
 ## Reglas
 - Todo el texto en español.
+- Excepción: los mensajes de commit se escriben en inglés.
 - No inventes datos de la asociación: usa marcadores entre corchetes, como [Texto de presentación].
 - El calendario de eventos calculado automáticamente queda FUERA de esta web: es parte del TFG de Michelle y se conectará más adelante mediante una API. Aquí los eventos se escriben a mano.
 - Al migrar desde Blogger, conserva las URL antiguas con redirecciones en Netlify.
