@@ -15,11 +15,27 @@ const RUTA_IDENTITY_DEV = "/identidad-dev";
 const { IDENTITY_URL } = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 const identityRemota = IDENTITY_URL ? new URL(IDENTITY_URL) : null;
 
+// Solo al compilar: sanitize-html es CommonJS y hace require() de htmlparser2,
+// que solo es ESM. La función de Netlify no admite require() de un módulo ESM
+// y fallaba con ERR_REQUIRE_ESM (error 500 en /escribir). Al empaquetar ambos,
+// el require se convierte en un import al compilar. En `astro dev` no se
+// aplica: Vite no puede ejecutar ese CommonJS empaquetado y Node ya lo admite.
+/** @type {import("astro").AstroIntegration} */
+const empaquetarSanitizeHtml = {
+  name: "empaquetar-sanitize-html",
+  hooks: {
+    "astro:config:setup": ({ command, updateConfig }) => {
+      if (command !== "build") return;
+      updateConfig({ vite: { ssr: { noExternal: ["sanitize-html", "htmlparser2"] } } });
+    },
+  },
+};
+
 // https://astro.build/config
 // Todas las páginas se generan estáticas; solo el panel de Keystatic
 // (/keystatic y /api/keystatic) se ejecuta en una función de Netlify.
 export default defineConfig({
-  integrations: [react(), keystatic()],
+  integrations: [react(), keystatic(), empaquetarSanitizeHtml],
   adapter: netlify({
     // Solo afecta a `astro dev`. No usamos Edge Functions y su emulación
     // descarga Deno, que falla. Blobs sigue emulado (no depende de esto).
