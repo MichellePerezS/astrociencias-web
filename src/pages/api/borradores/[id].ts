@@ -4,7 +4,8 @@ import { json } from "../../../lib/respuestas";
 
 export const prerender = false;
 
-const ESTADOS = { "no-encontrado": 404, conflicto: 409, "demasiado-grande": 413 } as const;
+// «bloqueado»: el estado del flujo de revisión no le deja editar (src/lib/flujo.ts).
+const ESTADOS = { "no-encontrado": 404, conflicto: 409, "demasiado-grande": 413, bloqueado: 403 } as const;
 
 // Guarda los cambios de un borrador (guardado automático del editor).
 // Cuerpo: { version, titulo, resumen, area, imagen, imagenAlt, contenido }.

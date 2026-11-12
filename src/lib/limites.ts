@@ -7,4 +7,6 @@ export const LIMITES = {
   imagenAlt: 300,
   /** Tamaño máximo del HTML del cuerpo. */
   contenido: 400_000,
+  /** Comentario al devolver un borrador al autor. */
+  comentario: 2_000,
 } as const;

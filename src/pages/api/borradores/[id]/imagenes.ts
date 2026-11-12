@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { randomUUID } from "node:crypto";
 import { leerBorrador, tiendaImagenes } from "../../../../lib/borradores";
+import { puedeEditar } from "../../../../lib/flujo";
 import { MAX_BYTES_IMAGEN, TIPOS_IMAGEN, detectarTipo } from "../../../../lib/imagenes";
 import { json } from "../../../../lib/respuestas";
 
@@ -12,6 +13,8 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
   const usuario = locals.usuario!;
   const actual = await leerBorrador(usuario, params.id ?? "");
   if (!actual) return json({ error: "no-encontrado" }, 404);
+  // En revisión (para autores) o aprobado no se pueden añadir imágenes.
+  if (!puedeEditar(usuario, actual.borrador)) return json({ error: "bloqueado" }, 403);
 
   const declarado = Number(request.headers.get("content-length") ?? 0);
   if (declarado > MAX_BYTES_IMAGEN) return json({ error: "demasiado-grande" }, 413);

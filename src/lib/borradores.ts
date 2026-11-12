@@ -4,12 +4,24 @@
 // Tienda «editor-imagenes»:   «<id del borrador>/<id de la imagen>.<ext>».
 //
 // Permisos (se comprueban siempre aquí, en el servidor):
-//   editor → ve y edita todos los borradores.
+//   editor → ve todos los borradores.
 //   autor  → solo los que ha creado él (propietario.id = su id de Identity).
+// Quién puede editar o cambiar el estado depende del flujo de revisión
+// (src/lib/flujo.ts).
 
 import { getStore } from "@netlify/blobs";
 import { randomUUID } from "node:crypto";
 import { AREAS } from "../content/areas";
+import {
+  estadoDe,
+  estadoTras,
+  limpiarComentario,
+  puedeAplicar,
+  puedeEditar,
+  type Accion,
+  type EstadoBorrador,
+  type EventoRevision,
+} from "./flujo";
 import type { Usuario } from "./identidad";
 import { esImagenDelBorrador, limpiarHtml, textoPlano } from "./limpiar-html";
 import { LIMITES } from "./limites";
@@ -28,6 +40,10 @@ export interface Borrador {
   contenido: string;
   creado: string;
   actualizado: string;
+  /** Estado en el flujo de revisión (los borradores anteriores a la fase 3 no lo tienen). */
+  estado: EstadoBorrador;
+  /** Envíos, aprobaciones y devoluciones, del más antiguo al más reciente. */
+  historial: EventoRevision[];
 }
 
 export interface BorradorConVersion {
@@ -62,7 +78,7 @@ export async function leerBorrador(usuario: Usuario, id: string): Promise<Borrad
   if (!entrada?.data) return noEncontrado(id, "no existe en la tienda");
   const etag = entrada.etag ?? (await etagEmulado(tienda, id));
   if (!etag) return noEncontrado(id, "Blobs no devolvió ETag");
-  const borrador = entrada.data as Borrador;
+  const borrador = normalizar(entrada.data as Borrador);
   if (!puedeAcceder(usuario, borrador)) {
     return noEncontrado(
       id,
@@ -70,6 +86,15 @@ export async function leerBorrador(usuario: Usuario, id: string): Promise<Borrad
     );
   }
   return { borrador, version: etag };
+}
+
+/** Completa los campos que no tienen los borradores guardados antes de la fase 3. */
+function normalizar(borrador: Borrador): Borrador {
+  return {
+    ...borrador,
+    estado: estadoDe(borrador.estado),
+    historial: Array.isArray(borrador.historial) ? borrador.historial : [],
+  };
 }
 
 /** Solo en `astro dev`: explica en la terminal por qué un borrador da 404. */
@@ -104,6 +129,8 @@ export async function crearBorrador(usuario: Usuario): Promise<BorradorConVersio
     contenido: "",
     creado: ahora,
     actualizado: ahora,
+    estado: "edicion",
+    historial: [],
   };
   const r = await tiendaBorradores().setJSON(borrador.id, borrador, { onlyIfNew: true });
   if (!r.modified || !r.etag) throw new Error("No se pudo crear el borrador.");
@@ -122,7 +149,7 @@ export interface CambiosBorrador {
 
 export type ResultadoGuardado =
   | { ok: true; version: string; borrador: Borrador }
-  | { ok: false; motivo: "no-encontrado" | "conflicto" | "demasiado-grande" };
+  | { ok: false; motivo: "no-encontrado" | "conflicto" | "demasiado-grande" | "bloqueado" };
 
 /**
  * Valida, limpia y guarda los cambios. Solo escribe si la versión que tenía
@@ -137,6 +164,7 @@ export async function guardarBorrador(
   const actual = await leerBorrador(usuario, id);
   if (!actual) return { ok: false, motivo: "no-encontrado" };
   if (actual.version !== versionCliente) return { ok: false, motivo: "conflicto" };
+  if (!puedeEditar(usuario, actual.borrador)) return { ok: false, motivo: "bloqueado" };
 
   if (typeof cambios.contenido === "string" && cambios.contenido.length > LIMITES.contenido) {
     return { ok: false, motivo: "demasiado-grande" };
@@ -171,5 +199,57 @@ export async function listarBorradores(usuario: Usuario): Promise<Borrador[]> {
   );
   return todos
     .filter((b): b is Borrador => !!b && puedeAcceder(usuario, b))
+    .map(normalizar)
     .sort((a, b) => b.actualizado.localeCompare(a.actualizado));
+}
+
+export type ResultadoCambioEstado =
+  | { ok: true; version: string; borrador: Borrador }
+  | {
+      ok: false;
+      motivo: "no-encontrado" | "conflicto" | "no-permitido" | "incompleto" | "sin-comentario";
+    };
+
+/**
+ * Aplica una acción del flujo de revisión (enviar, aprobar o devolver).
+ * Comprueba el rol y el estado aquí, en el servidor, y solo escribe si la
+ * versión que tenía el navegador sigue siendo la última.
+ */
+export async function cambiarEstado(
+  usuario: Usuario,
+  id: string,
+  versionCliente: string,
+  accion: Accion,
+  comentarioCliente: unknown,
+): Promise<ResultadoCambioEstado> {
+  const actual = await leerBorrador(usuario, id);
+  if (!actual) return { ok: false, motivo: "no-encontrado" };
+  if (actual.version !== versionCliente) return { ok: false, motivo: "conflicto" };
+  const previo = actual.borrador;
+  if (!puedeAplicar(usuario, previo, accion)) return { ok: false, motivo: "no-permitido" };
+
+  // Para revisar hace falta al menos título y texto.
+  if (accion === "enviar" && (!previo.titulo.trim() || !textoPlano(previo.contenido, 1))) {
+    return { ok: false, motivo: "incompleto" };
+  }
+  const comentario = limpiarComentario(comentarioCliente, LIMITES.comentario);
+  if (accion === "devolver" && !comentario) return { ok: false, motivo: "sin-comentario" };
+
+  const ahora = new Date().toISOString();
+  const evento: EventoRevision = {
+    accion,
+    por: { id: usuario.id, nombre: usuario.nombre },
+    fecha: ahora,
+    ...(accion === "devolver" ? { comentario } : {}),
+  };
+  const borrador: Borrador = {
+    ...previo,
+    estado: estadoTras(accion),
+    historial: [...previo.historial, evento],
+    actualizado: ahora,
+  };
+
+  const r = await tiendaBorradores().setJSON(id, borrador, { onlyIfMatch: actual.version });
+  if (!r.modified || !r.etag) return { ok: false, motivo: "conflicto" };
+  return { ok: true, version: r.etag, borrador };
 }
