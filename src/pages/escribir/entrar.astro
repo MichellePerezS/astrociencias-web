@@ -108,14 +108,25 @@ import Base from "../../layouts/Base.astro";
       location.replace(volver);
       return;
     }
+    const { error } = (await r.json().catch(() => ({}))) as { error?: string };
     await usuario.logout().catch(() => {});
     mostrar(formEntrar);
-    avisar(
-      r.status === 403
-        ? "Tu cuenta existe, pero todavía no tiene un rol asignado (autor o editor). Pide a un editor que te lo asigne."
-        : "No se ha podido abrir la sesión. Inténtalo de nuevo.",
-      "error",
-    );
+    avisar(mensajeSesion(r.status, error), "error");
+  }
+
+  /** Mensaje según el motivo que devuelve /api/sesion. */
+  function mensajeSesion(status: number, error: string | undefined): string {
+    if (status === 403 && error === "sin-rol") {
+      return "Tu cuenta existe, pero todavía no tiene un rol asignado (autor o editor). Pide a un editor que te lo asigne.";
+    }
+    if (status === 403 && error === "origen") {
+      return "El servidor ha rechazado la petición porque no viene de esta misma web. Abre la página desde la dirección del sitio e inténtalo de nuevo.";
+    }
+    if (status === 401) return "Tu sesión no es válida o ha caducado. Vuelve a entrar.";
+    if (status === 502) {
+      return "No se ha podido comprobar tu cuenta con el servicio de acceso. Inténtalo de nuevo en unos minutos.";
+    }
+    return "No se ha podido abrir la sesión. Inténtalo de nuevo.";
   }
 
   function errorDe(e: unknown): string {

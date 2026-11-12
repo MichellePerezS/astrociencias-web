@@ -1,4 +1,6 @@
-// Sesión y roles del editor propio (/escribir), con Netlify Identity.
+  // En `astro dev` el .env solo llega a import.meta.env, no a process.env.
+  // Fuera de dev se lee solo process.env, como antes (no se incrusta al compilar).
+  const explicita = (import.meta.env.DEV && import.meta.env.IDENTITY_URL) || process.env.IDENTITY_URL;// Sesión y roles del editor propio (/escribir), con Netlify Identity.
 //
 // Roles, en app_metadata.roles del usuario (solo los puede cambiar un
 // administrador del sitio en Netlify, nunca el propio usuario):
@@ -27,7 +29,9 @@ export interface Usuario {
 /** URL de la API de Netlify Identity del sitio. */
 function urlIdentity(): string {
   // IDENTITY_URL permite apuntar a la Identity del sitio publicado desde `astro dev`.
-  const explicita = process.env.IDENTITY_URL;
+  // En `astro dev` el .env solo llega a import.meta.env, no a process.env.
+  // Fuera de dev se lee solo process.env, como antes (no se incrusta al compilar).
+  const explicita = (import.meta.env.DEV && import.meta.env.IDENTITY_URL) || process.env.IDENTITY_URL;
   if (explicita) return explicita.replace(/\/$/, "");
   // URL la define Netlify (en la compilación y en las funciones).
   const sitio = process.env.URL;
@@ -56,12 +60,16 @@ export function rolDesdeMetadatos(roles: unknown): { rol: Rol; autor: string | n
   return null;
 }
 
+/** Resultado de comprobar un token, para poder explicar por qué no vale. */
+export type ComprobacionToken =
+  | { ok: true; usuario: Usuario }
+  | { ok: false; motivo: "token" | "sin-rol" | "identidad" };
+
 /**
  * Valida el token con Netlify Identity (firma y caducidad las comprueba Identity)
- * y devuelve el usuario con su rol. Devuelve null si el token no vale o el
- * usuario no tiene ningún rol de la aplicación.
+ * y comprueba que el usuario tenga un rol de la aplicación.
  */
-export async function verificarToken(token: string): Promise<Usuario | null> {
+export async function comprobarToken(token: string): Promise<ComprobacionToken> {
   let respuesta: Response;
   try {
     respuesta = await fetch(`${urlIdentity()}/user`, {
@@ -69,20 +77,33 @@ export async function verificarToken(token: string): Promise<Usuario | null> {
     });
   } catch (error) {
     console.error("[identidad] No se pudo contactar con Netlify Identity:", error);
-    return null;
+    return { ok: false, motivo: "identidad" };
   }
-  if (!respuesta.ok) return null;
+  if (respuesta.status === 401 || respuesta.status === 403) return { ok: false, motivo: "token" };
+  if (!respuesta.ok) {
+    console.error(`[identidad] Netlify Identity respondió ${respuesta.status}.`);
+    return { ok: false, motivo: "identidad" };
+  }
 
   const datos = (await respuesta.json()) as UsuarioIdentity;
   const permiso = rolDesdeMetadatos(datos.app_metadata?.roles);
-  if (!permiso) return null;
+  if (!permiso) return { ok: false, motivo: "sin-rol" };
 
   return {
-    id: datos.id,
-    correo: datos.email,
-    nombre: datos.user_metadata?.full_name || datos.email,
-    ...permiso,
+    ok: true,
+    usuario: {
+      id: datos.id,
+      correo: datos.email,
+      nombre: datos.user_metadata?.full_name || datos.email,
+      ...permiso,
+    },
   };
+}
+
+/** Como comprobarToken, pero solo devuelve el usuario o null (para el middleware). */
+export async function verificarToken(token: string): Promise<Usuario | null> {
+  const r = await comprobarToken(token);
+  return r.ok ? r.usuario : null;
 }
 
 /** Segundos que le quedan al token (lee `exp` sin verificar; solo para la cookie). */

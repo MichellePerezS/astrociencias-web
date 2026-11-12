@@ -2,8 +2,8 @@ import type { APIRoute } from "astro";
 import {
   borrarSesion,
   guardarSesion,
+  comprobarToken,
   segundosRestantes,
-  verificarToken,
 } from "../../lib/identidad";
 
 export const prerender = false;
@@ -32,14 +32,16 @@ export const POST: APIRoute = async ({ request, url, cookies }) => {
   }
   if (typeof token !== "string" || !token) return json({ error: "peticion" }, 400);
 
-  const usuario = await verificarToken(token);
-  if (!usuario) {
+  const r = await comprobarToken(token);
+  if (!r.ok) {
     borrarSesion(cookies);
-    return json({ error: "sin-permiso" }, 403);
+    // 403 solo para «sin rol»; token no válido → 401; Identity inaccesible → 502.
+    const estado = { "sin-rol": 403, token: 401, identidad: 502 }[r.motivo];
+    return json({ error: r.motivo }, estado);
   }
 
   guardarSesion(cookies, token, segundosRestantes(token));
-  return json({ rol: usuario.rol });
+  return json({ rol: r.usuario.rol });
 };
 
 // Cierra la sesión del servidor.
