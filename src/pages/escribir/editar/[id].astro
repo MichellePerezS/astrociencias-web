@@ -2,6 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import PaginaEditor from "../../../components/editor/PaginaEditor.astro";
 import { leerBorrador } from "../../../lib/borradores";
+import { accionesPermitidas, puedeEditar, ultimaDevolucion } from "../../../lib/flujo";
 
 export const prerender = false;
 
@@ -11,27 +12,36 @@ const usuario = Astro.locals.usuario!;
 const encontrado = await leerBorrador(usuario, Astro.params.id ?? "");
 if (!encontrado) Astro.response.status = 404;
 
+const borrador = encontrado?.borrador;
 const nota =
-  encontrado && encontrado.borrador.propietario.id !== usuario.id
-    ? `Borrador de ${encontrado.borrador.propietario.nombre}`
-    : undefined;
+  borrador && borrador.propietario.id !== usuario.id ? `Borrador de ${borrador.propietario.nombre}` : undefined;
+
+// El comentario solo se muestra mientras está devuelto; el historial completo va aparte.
+const devolucion = borrador?.estado === "devuelto" ? ultimaDevolucion(borrador.historial) : null;
 ---
 
 {
-  encontrado ? (
+  encontrado && borrador ? (
     <PaginaEditor
-      titulo={encontrado.borrador.titulo || "Borrador sin título"}
+      titulo={borrador.titulo || "Borrador sin título"}
       nota={nota}
+      historial={borrador.historial}
       datos={{
-        id: encontrado.borrador.id,
+        id: borrador.id,
         version: encontrado.version,
-        titulo: encontrado.borrador.titulo,
-        resumen: encontrado.borrador.resumen,
-        area: encontrado.borrador.area,
-        imagen: encontrado.borrador.imagen,
-        imagenAlt: encontrado.borrador.imagenAlt,
-        contenido: encontrado.borrador.contenido,
-        actualizado: encontrado.borrador.actualizado,
+        titulo: borrador.titulo,
+        resumen: borrador.resumen,
+        area: borrador.area,
+        imagen: borrador.imagen,
+        imagenAlt: borrador.imagenAlt,
+        contenido: borrador.contenido,
+        actualizado: borrador.actualizado,
+        estadoRevision: borrador.estado,
+        editable: puedeEditar(usuario, borrador),
+        acciones: accionesPermitidas(usuario, borrador),
+        devolucion: devolucion
+          ? { comentario: devolucion.comentario ?? "", por: devolucion.por.nombre, fecha: devolucion.fecha }
+          : null,
       }}
     />
   ) : (

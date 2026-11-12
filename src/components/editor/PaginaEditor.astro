@@ -1,15 +1,26 @@
 ---
 import Base from "../../layouts/Base.astro";
 import EditorArticulo, { type DatosIniciales } from "./EditorArticulo";
+import type { EventoRevision } from "../../lib/flujo";
 
 interface Props {
   titulo: string;
   datos: DatosIniciales;
   /** Aviso opcional sobre la hoja (p. ej. «Borrador de …» para editores). */
   nota?: string;
+  /** Historial de revisión (envíos, aprobaciones y devoluciones). */
+  historial?: EventoRevision[];
 }
 
-const { titulo, datos, nota } = Astro.props;
+const { titulo, datos, nota, historial = [] } = Astro.props;
+
+const VERBO: Record<EventoRevision["accion"], string> = {
+  enviar: "lo envió a revisión",
+  aprobar: "lo aprobó",
+  devolver: "lo devolvió",
+};
+const fechaHora = (iso: string) =>
+  new Date(iso).toLocaleString("es-EC", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Guayaquil" });
 ---
 
 <Base title={titulo} description="Editor de artículos de AstroCiencias Ecuador.">
@@ -20,6 +31,24 @@ const { titulo, datos, nota } = Astro.props;
       {nota && <p class="nota">{nota}</p>}
     </div>
     <EditorArticulo client:only="react" inicial={datos} />
+    {
+      historial.length > 0 && (
+        <details class="historial">
+          <summary>Historial de revisión ({historial.length})</summary>
+          <ol>
+            {[...historial].reverse().map((e) => (
+              <li>
+                <time datetime={e.fecha}>{fechaHora(e.fecha)}</time>
+                <span>
+                  {e.por.nombre} {VERBO[e.accion]}
+                </span>
+                {e.comentario && <p class="comentario">{e.comentario}</p>}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )
+    }
   </section>
 </Base>
 
@@ -47,5 +76,48 @@ const { titulo, datos, nota } = Astro.props;
   .nota {
     color: var(--texto-suave);
     font-size: 15px;
+  }
+
+  .historial {
+    margin-top: var(--space-6);
+    color: var(--texto-suave);
+  }
+
+  .historial summary {
+    cursor: pointer;
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    color: var(--texto);
+    padding-block: 8px;
+  }
+
+  .historial ol {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-left: 1px solid var(--linea);
+    padding-left: 16px;
+  }
+
+  .historial li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .historial time {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--dorado);
+  }
+
+  .historial .comentario {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--texto);
+    white-space: pre-wrap;
   }
 </style>

@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import { fechaCorta } from "../../lib/blog";
 import { listarBorradores } from "../../lib/borradores";
+import { ETIQUETAS_ESTADO, ultimaDevolucion, type EstadoBorrador } from "../../lib/flujo";
 
 // Página privada: se genera en el servidor en cada visita.
 // El middleware ya ha comprobado la sesión y el rol.
@@ -23,7 +24,8 @@ const delRepositorio = (await getCollection("blog")).filter(
 // Borradores del editor propio (Netlify Blobs), ya filtrados por permiso.
 const delEditor = await listarBorradores(usuario);
 
-type Estado = "edicion" | "borrador" | "publicado";
+// Estados del flujo de revisión (borradores del editor) y del repositorio.
+type Estado = EstadoBorrador | "borrador" | "publicado";
 interface Fila {
   clave: string;
   titulo: string;
@@ -32,6 +34,8 @@ interface Fila {
   area: string;
   fecha: Date;
   estado: Estado;
+  /** Comentario de la última devolución, si está devuelto. */
+  comentario: { texto: string; por: string } | null;
 }
 
 const filas: Fila[] = [
@@ -42,7 +46,14 @@ const filas: Fila[] = [
     autor: (b.autor && autores.get(b.autor)) || b.propietario.nombre,
     area: b.area ?? "—",
     fecha: new Date(b.actualizado),
-    estado: "edicion" as const,
+    estado: b.estado as Estado,
+    comentario: (() => {
+      const d = b.estado === "devuelto" ? ultimaDevolucion(b.historial) : null;
+      if (!d?.comentario) return null;
+      // En la lista, un extracto; el comentario completo se ve en el editor.
+      const texto = d.comentario.length > 280 ? `${d.comentario.slice(0, 280).trimEnd()}…` : d.comentario;
+      return { texto, por: d.por.nombre };
+    })(),
   })),
   ...delRepositorio.map((a) => ({
     clave: `r-${a.id}`,
@@ -52,14 +63,18 @@ const filas: Fila[] = [
     area: a.data.tema || a.data.area,
     fecha: a.data.fecha,
     estado: (a.data.borrador ? "borrador" : "publicado") as Estado,
+    comentario: null,
   })),
 ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
 
 const ETIQUETAS: Record<Estado, string> = {
-  edicion: "En edición",
+  ...ETIQUETAS_ESTADO,
   borrador: "Borrador",
   publicado: "Publicado",
 };
+
+const enRevision = delEditor.filter((b) => b.estado === "revision").length;
+const devueltos = delEditor.filter((b) => b.estado === "devuelto").length;
 
 const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
 ---
@@ -76,6 +91,13 @@ const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
     </div>
     <div class="acciones">
       <a href="/escribir/nuevo" class="boton boton-principal">Nuevo artículo</a>
+      {
+        esEditor && (
+          <a href="/escribir/revision" class="boton boton-secundario">
+            Revisión{enRevision > 0 && ` (${enRevision})`}
+          </a>
+        )
+      }
       <a href="/escribir/entrar?salir=1" class="boton boton-secundario">Cerrar sesión</a>
     </div>
   </section>
@@ -104,7 +126,8 @@ const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
         <>
           <p class="resumen">
             {filas.length} {filas.length === 1 ? "artículo" : "artículos"}
-            {delEditor.length > 0 && ` · ${delEditor.length} en edición`}
+            {enRevision > 0 && ` · ${enRevision} en revisión`}
+            {devueltos > 0 && ` · ${devueltos} ${devueltos === 1 ? "devuelto" : "devueltos"}`}
           </p>
           <div class="tabla">
             <table>
@@ -120,7 +143,14 @@ const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
               <tbody>
                 {filas.map((f) => (
                   <tr>
-                    <td class="col-titulo">{f.href ? <a href={f.href}>{f.titulo}</a> : f.titulo}</td>
+                    <td class="col-titulo">
+                      {f.href ? <a href={f.href}>{f.titulo}</a> : f.titulo}
+                      {f.comentario && (
+                        <p class="comentario">
+                          <span>Comentario de {f.comentario.por}:</span> {f.comentario.texto}
+                        </p>
+                      )}
+                    </td>
                     {esEditor && <td>{f.autor}</td>}
                     <td>{f.area}</td>
                     <td class="col-fecha">{fechaCorta(f.fecha)}</td>
@@ -133,7 +163,10 @@ const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
             </table>
           </div>
           <p class="leyenda">
-            <strong>En edición</strong>: borradores de este editor, sin publicar.
+            <strong>En edición</strong>: borradores de este editor, sin enviar.
+            <strong>En revisión</strong>: enviados; solo los editores pueden cambiarlos.
+            <strong>Devuelto</strong>: el autor debe hacer cambios y volver a enviarlo.
+            <strong>Aprobado</strong>: listo para publicar.
             <strong>Borrador</strong>: artículos del repositorio marcados como borrador.
           </p>
         </>
@@ -264,7 +297,30 @@ const autorVinculado = usuario.autor ? autores.get(usuario.autor) : undefined;
     background: var(--cosmos-3);
   }
 
-  .borrador {
+  .borrador,
+  .revision {
+    color: var(--dorado);
+  }
+
+  .aprobado {
+    color: var(--azul);
+  }
+
+  .devuelto {
+    color: var(--error);
+  }
+
+  .comentario {
+    margin-top: 6px;
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--texto-suave);
+    white-space: pre-wrap;
+  }
+
+  .comentario span {
+    font-family: var(--font-mono);
+    font-size: 12px;
     color: var(--dorado);
   }
 

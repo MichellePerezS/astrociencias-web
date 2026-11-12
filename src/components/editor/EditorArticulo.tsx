@@ -1,6 +1,7 @@
 // Editor visual de artículos (isla de React con TipTap).
 // Guarda solo, unos segundos después de cada cambio, en /api/borradores.
-// El servidor vuelve a validar y limpiar todo lo que llega desde aquí.
+// El servidor vuelve a validar y limpiar todo lo que llega desde aquí,
+// y comprueba el rol en cada cambio de estado del flujo de revisión.
 
 import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react";
@@ -8,6 +9,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import FileHandler from "@tiptap/extension-file-handler";
 import { AREAS } from "../../content/areas";
+import { ETIQUETAS_ESTADO, type Accion, type EstadoBorrador } from "../../lib/flujo";
 import { MAX_BYTES_IMAGEN, TIPOS_IMAGEN } from "../../lib/imagenes";
 import { LIMITES } from "../../lib/limites";
 import "./editor.css";
@@ -22,6 +24,14 @@ export interface DatosIniciales {
   imagenAlt: string;
   contenido: string;
   actualizado: string | null;
+  /** Estado en el flujo de revisión. */
+  estadoRevision: EstadoBorrador;
+  /** Si el usuario puede editar el contenido en este estado (lo decide el servidor). */
+  editable: boolean;
+  /** Acciones de revisión que el usuario puede aplicar (el servidor las vuelve a comprobar). */
+  acciones: Accion[];
+  /** Último comentario al devolverlo, si está devuelto. */
+  devolucion: { comentario: string; por: string; fecha: string } | null;
 }
 
 interface Campos {
@@ -39,7 +49,9 @@ type Estado =
   | "guardado"
   | "error"
   | "conflicto"
-  | "sesion";
+  | "sesion"
+  | "solo-lectura"
+  | "bloqueado";
 
 const ESPERA_GUARDADO_MS = 1500;
 const REINTENTO_MS = 10_000;
@@ -48,6 +60,8 @@ const MB = (MAX_BYTES_IMAGEN / 1024 / 1024).toFixed(0);
 
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString("es-EC", { hour: "2-digit", minute: "2-digit" });
+const fechaHora = (iso: string) =>
+  new Date(iso).toLocaleString("es-EC", { dateStyle: "medium", timeStyle: "short" });
 
 export default function EditorArticulo({ inicial }: { inicial: DatosIniciales }) {
   const [campos, setCampos] = useState<Campos>({
@@ -57,7 +71,10 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
     imagen: inicial.imagen,
     imagenAlt: inicial.imagenAlt,
   });
-  const [estado, setEstado] = useState<Estado>(inicial.actualizado ? "guardado" : "sin-cambios");
+  const editable = inicial.editable;
+  const [estado, setEstado] = useState<Estado>(
+    !editable ? "solo-lectura" : inicial.actualizado ? "guardado" : "sin-cambios",
+  );
   const [ultimoGuardado, setUltimoGuardado] = useState(inicial.actualizado);
   const [aviso, setAviso] = useState("");
   const [subiendo, setSubiendo] = useState(0);
@@ -70,8 +87,12 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   const guardando = useRef(false);
   const otraVez = useRef(false);
-  const bloqueado = useRef(false);
+  const bloqueado = useRef(!editable);
   const creando = useRef<Promise<string> | null>(null);
+  /** Guardado en marcha (para esperar a que termine antes de cambiar de estado). */
+  const enCurso = useRef<Promise<void> | null>(null);
+  /** Hay cambios que todavía no ha confirmado el servidor. */
+  const sucio = useRef(false);
 
   /** Crea el borrador en el servidor la primera vez que hace falta. */
   const asegurarId = useCallback(async (): Promise<string> => {
@@ -93,67 +114,97 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
     }
   }, []);
 
-  const guardar = useCallback(async () => {
-    if (bloqueado.current) return;
+  const guardar = useCallback((): Promise<void> => {
+    if (bloqueado.current) return Promise.resolve();
     if (guardando.current) {
       otraVez.current = true;
-      return;
+      return enCurso.current ?? Promise.resolve();
     }
     if (temporizador.current) clearTimeout(temporizador.current);
     guardando.current = true;
     setEstado("guardando");
 
-    try {
-      const id = await asegurarId();
-      const r = await fetch(`/api/borradores/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          version: versionRef.current,
-          ...camposRef.current,
-          area: camposRef.current.area || null,
-          contenido: editorRef.current?.getHTML() ?? "",
-        }),
-      });
+    enCurso.current = (async () => {
+      try {
+        const id = await asegurarId();
+        // Lo que se envía ahora; si se cambia algo durante el envío, vuelve a quedar sucio.
+        sucio.current = false;
+        const r = await fetch(`/api/borradores/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            version: versionRef.current,
+            ...camposRef.current,
+            area: camposRef.current.area || null,
+            contenido: editorRef.current?.getHTML() ?? "",
+          }),
+        });
 
-      if (r.ok) {
-        const { version, actualizado } = (await r.json()) as { version: string; actualizado: string };
-        versionRef.current = version;
-        setUltimoGuardado(actualizado);
-        setEstado(otraVez.current ? "pendiente" : "guardado");
-        setAviso("");
-      } else if (r.status === 409) {
-        bloqueado.current = true;
-        setEstado("conflicto");
-      } else if (r.status === 401) {
-        bloqueado.current = true;
-        setEstado("sesion");
-      } else if (r.status === 413) {
-        setEstado("error");
-        setAviso("El texto es demasiado largo para guardarlo. Divide el artículo o quita contenido.");
-      } else {
-        throw new Error(String(r.status));
+        if (r.ok) {
+          const { version, actualizado } = (await r.json()) as { version: string; actualizado: string };
+          versionRef.current = version;
+          setUltimoGuardado(actualizado);
+          setEstado(otraVez.current ? "pendiente" : "guardado");
+          setAviso("");
+          return;
+        }
+        sucio.current = true;
+        if (r.status === 409) {
+          bloqueado.current = true;
+          setEstado("conflicto");
+        } else if (r.status === 401) {
+          bloqueado.current = true;
+          setEstado("sesion");
+        } else if (r.status === 403) {
+          // El borrador ha cambiado de estado (p. ej. lo han enviado a revisión en otra pestaña).
+          bloqueado.current = true;
+          setEstado("bloqueado");
+        } else if (r.status === 413) {
+          setEstado("error");
+          setAviso("El texto es demasiado largo para guardarlo. Divide el artículo o quita contenido.");
+        } else {
+          throw new Error(String(r.status));
+        }
+      } catch (e) {
+        sucio.current = true;
+        if ((e as Error).message === "sesion") {
+          bloqueado.current = true;
+          setEstado("sesion");
+        } else {
+          setEstado("error");
+          temporizador.current = setTimeout(() => void guardar(), REINTENTO_MS);
+        }
+      } finally {
+        guardando.current = false;
+        enCurso.current = null;
+        if (otraVez.current && !bloqueado.current) {
+          otraVez.current = false;
+          void guardar();
+        }
       }
-    } catch (e) {
-      if ((e as Error).message === "sesion") {
-        bloqueado.current = true;
-        setEstado("sesion");
+    })();
+    return enCurso.current;
+  }, [asegurarId]);
+
+  /** Guarda ya lo pendiente y espera. Devuelve false si queda algo sin guardar. */
+  const guardarTodo = useCallback(async (): Promise<boolean> => {
+    if (temporizador.current) clearTimeout(temporizador.current);
+    for (let i = 0; i < 5; i++) {
+      if (enCurso.current) {
+        await enCurso.current;
+      } else if (sucio.current && !bloqueado.current) {
+        await guardar();
       } else {
-        setEstado("error");
-        temporizador.current = setTimeout(() => void guardar(), REINTENTO_MS);
-      }
-    } finally {
-      guardando.current = false;
-      if (otraVez.current && !bloqueado.current) {
-        otraVez.current = false;
-        void guardar();
+        break;
       }
     }
-  }, [asegurarId]);
+    return !sucio.current && !enCurso.current;
+  }, [guardar]);
 
   /** Programa un guardado poco después del último cambio. */
   const programar = useCallback(() => {
     if (bloqueado.current) return;
+    sucio.current = true;
     setEstado("pendiente");
     if (temporizador.current) clearTimeout(temporizador.current);
     temporizador.current = setTimeout(() => void guardar(), ESPERA_GUARDADO_MS);
@@ -195,7 +246,9 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
               ? `«${archivo.name}» pesa más de ${MB} MB.`
               : r.status === 401
                 ? "Tu sesión ha caducado. Vuelve a entrar para subir imágenes."
-                : `No se pudo subir «${archivo.name}». Inténtalo de nuevo.`,
+                : r.status === 403
+                  ? "Este borrador ya no se puede editar en su estado actual."
+                  : `No se pudo subir «${archivo.name}». Inténtalo de nuevo.`,
         );
         return null;
       } catch {
@@ -223,6 +276,7 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
 
   const editor = useEditor({
     immediatelyRender: false,
+    editable,
     content: inicial.contenido,
     extensions: [
       StarterKit.configure({
@@ -264,6 +318,50 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
     return () => window.removeEventListener("beforeunload", alSalir);
   }, [estado, subiendo]);
 
+  // Cambios de estado del flujo de revisión
+  const [procesando, setProcesando] = useState(false);
+  const ejecutar = async (accion: Accion, comentario?: string): Promise<boolean> => {
+    setProcesando(true);
+    setAviso("");
+    try {
+      if (!(await guardarTodo())) {
+        setAviso("Hay cambios sin guardar. Espera a que se guarden (o recarga la página) e inténtalo de nuevo.");
+        return false;
+      }
+      const id = idRef.current;
+      if (!id) {
+        setAviso("Escribe el título y el texto antes de enviarlo a revisión.");
+        return false;
+      }
+      const r = await fetch(`/api/borradores/${id}/estado`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accion, version: versionRef.current, comentario }),
+      });
+      if (r.ok) {
+        // Quien envía se queda viendo su borrador (ya en solo lectura); el editor vuelve a la cola.
+        if (accion === "enviar") location.reload();
+        else location.assign("/escribir/revision");
+        return true;
+      }
+      const { error } = (await r.json().catch(() => ({}))) as { error?: string };
+      setAviso(mensajeAccion(r.status, error));
+      if (r.status === 409) {
+        bloqueado.current = true;
+        setEstado("conflicto");
+      } else if (r.status === 401) {
+        bloqueado.current = true;
+        setEstado("sesion");
+      }
+      return false;
+    } catch {
+      setAviso("No se ha podido completar la acción. Comprueba la conexión e inténtalo de nuevo.");
+      return false;
+    } finally {
+      setProcesando(false);
+    }
+  };
+
   // Imagen destacada
   const elegirDestacada = async (archivo: File | undefined) => {
     if (!archivo) return;
@@ -289,6 +387,15 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
           <a href={`/escribir/entrar?volver=${encodeURIComponent(location.pathname)}`}>Volver a entrar</a>
         )}
       </div>
+      <PanelRevision
+        estado={inicial.estadoRevision}
+        editable={editable}
+        acciones={inicial.acciones}
+        devolucion={inicial.devolucion}
+        procesando={procesando}
+        ejecutar={ejecutar}
+      />
+
       {aviso && (
         <p className="aviso-editor" role="alert">
           {aviso}
@@ -304,6 +411,7 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
             rows={2}
             maxLength={LIMITES.titulo}
             value={campos.titulo}
+            readOnly={!editable}
             placeholder="Título del artículo"
             onChange={(e) => cambiar("titulo", e.target.value.replace(/\n/g, " "))}
           />
@@ -317,6 +425,7 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
             rows={3}
             maxLength={LIMITES.resumen}
             value={campos.resumen}
+            readOnly={!editable}
             placeholder="Una o dos frases que resuman el artículo."
             onChange={(e) => cambiar("resumen", e.target.value)}
           />
@@ -324,7 +433,7 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
 
         <div className="campo campo-area">
           <label htmlFor="ed-area">Área</label>
-          <select id="ed-area" value={campos.area} onChange={(e) => cambiar("area", e.target.value)}>
+          <select id="ed-area" value={campos.area} disabled={!editable} onChange={(e) => cambiar("area", e.target.value)}>
             <option value="">Sin elegir</option>
             {AREAS.map((a) => (
               <option key={a} value={a}>
@@ -346,14 +455,19 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
                   type="text"
                   maxLength={LIMITES.imagenAlt}
                   value={campos.imagenAlt}
+                  readOnly={!editable}
                   placeholder="Describe la imagen para quien no puede verla"
                   onChange={(e) => cambiar("imagenAlt", e.target.value)}
                 />
               </div>
-              <button type="button" className="enlace" onClick={() => cambiar("imagen", null)}>
-                Quitar imagen
-              </button>
+              {editable && (
+                <button type="button" className="enlace" onClick={() => cambiar("imagen", null)}>
+                  Quitar imagen
+                </button>
+              )}
             </div>
+          ) : !editable ? (
+            <p className="ayuda">Sin imagen destacada.</p>
           ) : (
             <div className="zona-soltar" onDragOver={(e) => e.preventDefault()} onDrop={soltarDestacada}>
               <label htmlFor="ed-destacada" className="boton-archivo">
@@ -378,13 +492,15 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
           <span className="etiqueta-campo" id="ed-cuerpo">
             Texto
           </span>
-          {editor && <BarraHerramientas editor={editor} subirImagen={insertarImagenes} />}
+          {editor && editable && <BarraHerramientas editor={editor} subirImagen={insertarImagenes} />}
           <div className="marco-cuerpo" aria-labelledby="ed-cuerpo">
             <EditorContent editor={editor} />
           </div>
-          <span className="ayuda">
-            Puedes arrastrar o pegar imágenes en el texto (JPG, PNG, WebP o GIF, hasta {MB} MB).
-          </span>
+          {editable && (
+            <span className="ayuda">
+              Puedes arrastrar o pegar imágenes en el texto (JPG, PNG, WebP o GIF, hasta {MB} MB).
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -407,7 +523,141 @@ function textoEstado(estado: Estado, ultimo: string | null): string {
       return "Alguien ha guardado otra versión de este borrador. Recarga para ver la última; tus cambios desde entonces no se han guardado.";
     case "sesion":
       return "Tu sesión ha caducado. Los últimos cambios no se han guardado.";
+    case "solo-lectura":
+      return "Solo lectura: en este estado no puedes editar el borrador.";
+    case "bloqueado":
+      return "El borrador ha cambiado de estado y ya no puedes editarlo. Recarga la página; tus últimos cambios no se han guardado.";
   }
+}
+
+/** Mensaje para un cambio de estado rechazado por el servidor. */
+function mensajeAccion(status: number, error: string | undefined): string {
+  if (error === "incompleto") return "Añade un título y texto antes de enviarlo a revisión.";
+  if (error === "sin-comentario") return "Escribe un comentario para el autor explicando qué debe cambiar.";
+  if (status === 409) return "Alguien ha cambiado este borrador mientras tanto. Recarga la página para ver la última versión.";
+  if (status === 403) return "No puedes hacer esto con el borrador en su estado actual. Recarga la página.";
+  if (status === 401) return "Tu sesión ha caducado. Vuelve a entrar.";
+  if (status === 404) return "No encontramos este borrador. Puede que ya no tengas acceso a él.";
+  return "No se ha podido completar la acción. Inténtalo de nuevo.";
+}
+
+const EXPLICACION: Record<EstadoBorrador, string> = {
+  edicion: "Cuando esté listo, envíalo a revisión. Mientras lo revisan no podrás editarlo.",
+  revision: "Los editores lo están revisando.",
+  aprobado: "Aprobado y listo para publicar.",
+  devuelto: "Los editores lo han devuelto con un comentario. Haz los cambios y vuelve a enviarlo.",
+};
+
+function PanelRevision({
+  estado,
+  editable,
+  acciones,
+  devolucion,
+  procesando,
+  ejecutar,
+}: {
+  estado: EstadoBorrador;
+  editable: boolean;
+  acciones: Accion[];
+  devolucion: DatosIniciales["devolucion"];
+  procesando: boolean;
+  ejecutar: (accion: Accion, comentario?: string) => Promise<boolean>;
+}) {
+  const [devolviendo, setDevolviendo] = useState(false);
+  const [comentario, setComentario] = useState("");
+
+  const enviar = () => {
+    if (window.confirm("¿Enviar a revisión? No podrás editarlo hasta que te lo devuelvan.")) {
+      void ejecutar("enviar");
+    }
+  };
+  const aprobar = () => {
+    if (window.confirm("¿Aprobar este borrador? Quedará listo para publicar y nadie podrá editarlo.")) {
+      void ejecutar("aprobar");
+    }
+  };
+
+  let explicacion = EXPLICACION[estado];
+  if (estado === "revision" && editable) explicacion += " Puedes editarlo antes de aprobarlo o devolverlo.";
+  if (estado === "revision" && !editable) explicacion += " No puedes editarlo mientras tanto.";
+
+  return (
+    <section className="panel-revision" aria-labelledby="revision-titulo">
+      <div className="panel-revision-cabecera">
+        <h2 id="revision-titulo">Revisión</h2>
+        <span className={`estado-revision estado-revision-${estado}`}>{ETIQUETAS_ESTADO[estado]}</span>
+      </div>
+      <p>{explicacion}</p>
+
+      {devolucion && (
+        <figure className="comentario-revision">
+          <figcaption>
+            Comentario de {devolucion.por} · {fechaHora(devolucion.fecha)}
+          </figcaption>
+          <blockquote>{devolucion.comentario}</blockquote>
+        </figure>
+      )}
+
+      {acciones.length > 0 && !devolviendo && (
+        <div className="acciones-revision">
+          {acciones.includes("enviar") && (
+            <button type="button" className="boton boton-principal" disabled={procesando} onClick={enviar}>
+              Enviar a revisión
+            </button>
+          )}
+          {acciones.includes("aprobar") && (
+            <button type="button" className="boton boton-principal" disabled={procesando} onClick={aprobar}>
+              Aprobar
+            </button>
+          )}
+          {acciones.includes("devolver") && (
+            <button
+              type="button"
+              className="boton boton-secundario"
+              disabled={procesando}
+              onClick={() => setDevolviendo(true)}
+            >
+              Devolver al autor
+            </button>
+          )}
+        </div>
+      )}
+
+      {devolviendo && (
+        <form
+          className="form-devolver"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void ejecutar("devolver", comentario);
+          }}
+        >
+          <label htmlFor="revision-comentario">Comentario para el autor</label>
+          <textarea
+            id="revision-comentario"
+            rows={4}
+            required
+            maxLength={LIMITES.comentario}
+            value={comentario}
+            placeholder="Explica qué debe cambiar antes de volver a enviarlo."
+            onChange={(e) => setComentario(e.target.value)}
+          />
+          <div className="acciones-revision">
+            <button type="submit" className="boton boton-principal" disabled={procesando || !comentario.trim()}>
+              Devolver con este comentario
+            </button>
+            <button
+              type="button"
+              className="boton boton-secundario"
+              disabled={procesando}
+              onClick={() => setDevolviendo(false)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
 }
 
 function BarraHerramientas({

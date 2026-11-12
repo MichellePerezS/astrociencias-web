@@ -1,0 +1,235 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { fechaCorta } from "../../lib/blog";
+import { listarBorradores, type Borrador } from "../../lib/borradores";
+
+// Cola de revisión: solo para editores. El middleware ya ha comprobado la sesión.
+export const prerender = false;
+
+const usuario = Astro.locals.usuario!;
+if (usuario.rol !== "editor") return Astro.redirect("/escribir", 302);
+
+const autores = new Map((await getCollection("autores")).map((a) => [a.id, a.data.nombre]));
+const borradores = await listarBorradores(usuario);
+
+/** Fecha del último envío a revisión (o de la última modificación si no la hay). */
+const enviado = (b: Borrador) =>
+  new Date(b.historial.findLast((e) => e.accion === "enviar")?.fecha ?? b.actualizado);
+/** ¿Se había devuelto antes? (es un reenvío) */
+const reenviado = (b: Borrador) => b.historial.some((e) => e.accion === "devolver");
+const autorDe = (b: Borrador) => (b.autor && autores.get(b.autor)) || b.propietario.nombre;
+
+// Los más antiguos primero: llevan más tiempo esperando.
+const cola = borradores
+  .filter((b) => b.estado === "revision")
+  .sort((a, b) => enviado(a).getTime() - enviado(b).getTime());
+const aprobados = borradores
+  .filter((b) => b.estado === "aprobado")
+  .sort((a, b) => b.actualizado.localeCompare(a.actualizado));
+---
+
+<Base title="Revisión" description="Cola de revisión del equipo editorial de ACE.">
+  <section class="contenedor encabezado">
+    <a href="/escribir" class="volver">← Volver a la lista</a>
+    <p class="etiqueta">// Zona privada · Editor</p>
+    <h1>Cola de revisión</h1>
+    <p class="intro">
+      Abre un borrador para leerlo y editarlo. Desde el editor puedes aprobarlo o devolverlo al autor
+      con un comentario.
+    </p>
+  </section>
+
+  <section class="contenedor cuerpo" aria-labelledby="t-cola">
+    <h2 id="t-cola">Pendientes <span class="cuenta">{cola.length}</span></h2>
+    {
+      cola.length > 0 ? (
+        <div class="tabla">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Título</th>
+                <th scope="col">Autor</th>
+                <th scope="col">Área</th>
+                <th scope="col">Enviado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cola.map((b) => (
+                <tr>
+                  <td class="col-titulo">
+                    <a href={`/escribir/editar/${b.id}`}>{b.titulo || "Borrador sin título"}</a>
+                    {reenviado(b) && <span class="marca">Reenviado</span>}
+                  </td>
+                  <td>{autorDe(b)}</td>
+                  <td>{b.area ?? "—"}</td>
+                  <td class="col-fecha">{fechaCorta(enviado(b))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p class="vacio">No hay borradores esperando revisión.</p>
+      )
+    }
+  </section>
+
+  <section class="contenedor cuerpo" aria-labelledby="t-aprobados">
+    <h2 id="t-aprobados">Aprobados, listos para publicar <span class="cuenta">{aprobados.length}</span></h2>
+    {
+      aprobados.length > 0 ? (
+        <ul class="lista">
+          {aprobados.map((b) => (
+            <li>
+              <a href={`/escribir/editar/${b.id}`}>{b.titulo || "Borrador sin título"}</a>
+              <span>
+                {autorDe(b)} · {fechaCorta(new Date(b.actualizado))}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="vacio">Todavía no hay borradores aprobados.</p>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .encabezado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-block: 32px 24px;
+  }
+
+  .volver {
+    font-family: var(--font-titulos);
+    font-weight: 500;
+    font-size: 15px;
+    padding: 6px 0;
+  }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .intro {
+    color: var(--texto-suave);
+    max-width: 60ch;
+  }
+
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-bottom: var(--space-12);
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cuenta {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--dorado);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-sm);
+    padding: 1px 8px;
+  }
+
+  .tabla {
+    overflow-x: auto;
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+  }
+
+  table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 16px;
+  }
+
+  th {
+    text-align: left;
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--texto-suave);
+    background: var(--cosmos-2);
+  }
+
+  th,
+  td {
+    padding: 12px 16px;
+    vertical-align: top;
+  }
+
+  tbody tr {
+    border-top: 1px solid var(--linea);
+  }
+
+  .col-titulo {
+    font-weight: 600;
+  }
+
+  .col-fecha {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .marca {
+    margin-left: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--dorado);
+  }
+
+  .lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+  }
+
+  .lista li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 12px 16px;
+  }
+
+  .lista li + li {
+    border-top: 1px solid var(--linea);
+  }
+
+  .lista a {
+    font-weight: 600;
+  }
+
+  .lista span {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--texto-tenue);
+  }
+
+  .vacio {
+    color: var(--texto-suave);
+  }
+</style>

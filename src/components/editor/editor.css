@@ -24,7 +24,8 @@
 .barra-estado .estado-guardado { color: var(--azul); }
 .barra-estado .estado-error,
 .barra-estado .estado-conflicto,
-.barra-estado .estado-sesion { color: var(--error); }
+.barra-estado .estado-sesion,
+.barra-estado .estado-bloqueado { color: var(--error); }
 
 .barra-estado a,
 .editor-articulo .enlace {
@@ -278,4 +279,115 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Panel del flujo de revisión (sobre fondo oscuro, encima de la hoja) */
+.panel-revision {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block: 8px 20px;
+  padding: 20px 24px;
+  background: var(--cosmos-2);
+  border: 1px solid var(--linea);
+  border-radius: var(--radius-md);
+  color: var(--texto-suave);
+}
+
+.panel-revision-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.panel-revision h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.estado-revision {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.estado-revision-edicion { color: var(--texto); background: var(--cosmos-3); }
+.estado-revision-revision { color: var(--dorado); }
+.estado-revision-aprobado { color: var(--azul); }
+.estado-revision-devuelto { color: var(--error); }
+
+.comentario-revision {
+  margin: 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--dorado);
+  background: var(--cosmos);
+  border-radius: var(--radius-sm);
+}
+
+.comentario-revision figcaption {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--dorado);
+  margin-bottom: 6px;
+}
+
+.comentario-revision blockquote {
+  margin: 0;
+  color: var(--texto);
+  white-space: pre-wrap;
+}
+
+.acciones-revision {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* .boton está pensado para enlaces: aquí se quitan los estilos propios de <button>. */
+.acciones-revision .boton { cursor: pointer; }
+.acciones-revision .boton-principal { border: 0; }
+.acciones-revision .boton-secundario { background: transparent; }
+
+.acciones-revision .boton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-devolver {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-devolver label {
+  font-family: var(--font-titulos);
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.form-devolver textarea {
+  font: inherit;
+  color: var(--texto);
+  background: var(--cosmos);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.form-devolver textarea:focus {
+  outline: 2px solid var(--azul);
+  outline-offset: 1px;
+}
+
+.hoja input[readonly],
+.hoja textarea[readonly],
+.hoja select:disabled {
+  background: transparent;
+  cursor: default;
 }
