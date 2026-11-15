@@ -1,9 +1,11 @@
 // Ejecuta las pruebas e2e: `npm run test:e2e`.
 //
 // 1. Arranca el sustituto de Netlify Identity (identidad-mock.mjs) con dos
-//    cuentas de prueba: una autora y una editora.
-// 2. Arranca `astro dev --background` con IDENTITY_URL apuntando a ese
-//    sustituto (una variable del proceso tiene prioridad sobre .env).
+//    cuentas de prueba, una autora y una editora, y el de la API de GitHub
+//    (github-mock.mjs), con un repositorio en memoria.
+// 2. Arranca `astro dev --background` con IDENTITY_URL y ACE_GITHUB_* apuntando
+//    a esos sustitutos (una variable del proceso tiene prioridad sobre .env).
+//    Así la prueba nunca escribe en el repositorio real.
 // 3. Ejecuta la prueba del flujo de revisión en Chrome y, al acabar, para el
 //    servidor con `astro dev stop` y el sustituto.
 //
@@ -19,6 +21,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { arrancarGitHub } from "./github-mock.mjs";
 import { arrancarIdentidad } from "./identidad-mock.mjs";
 import { probarFlujoRevision } from "./flujo-revision.mjs";
 
@@ -46,6 +49,7 @@ const copiaBlobs = fs.existsSync(BLOBS) ? fs.mkdtempSync(path.join(os.tmpdir(), 
 if (copiaBlobs) fs.cpSync(BLOBS, copiaBlobs, { recursive: true });
 
 const identidad = await arrancarIdentidad();
+const github = await arrancarGitHub({ token: "token-github-prueba", repo: "ace-pruebas/web" });
 let arrancado = false;
 let fallos = 1;
 
@@ -53,19 +57,24 @@ try {
   const salida = await astro(["dev", "--background", "--host", "127.0.0.1", "--port", String(PUERTO)], {
     ...process.env,
     IDENTITY_URL: identidad.url,
+    ACE_GITHUB_TOKEN: github.token,
+    ACE_GITHUB_REPO: github.repo,
+    ACE_GITHUB_RAMA: github.rama,
+    ACE_GITHUB_API: github.url,
   });
   const m = /Dev server running at (http:\/\/[^\s"\\]+)/.exec(salida);
   if (!m) throw new Error(`astro dev no arrancó:\n${salida}`);
   arrancado = true;
   const base = m[1].replace(/\/$/, "");
   await esperarServidor(base);
-  console.log(`astro dev en ${base}, Identity simulada en ${identidad.url}\n`);
-  fallos = await probarFlujoRevision(base);
+  console.log(`astro dev en ${base}, Identity simulada en ${identidad.url}, GitHub simulado en ${github.url}\n`);
+  fallos = await probarFlujoRevision(base, github);
 } catch (e) {
   console.error("FALLO ", e instanceof Error ? e.message : e);
 } finally {
   if (arrancado) await astro(["dev", "stop"]);
   await identidad.parar();
+  await github.parar();
   if (copiaBlobs) {
     fs.rmSync(BLOBS, { recursive: true, force: true });
     fs.cpSync(copiaBlobs, BLOBS, { recursive: true });
