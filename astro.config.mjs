@@ -1,4 +1,6 @@
 // @ts-check
+import fs from "node:fs";
+import path from "node:path";
 import { defineConfig } from "astro/config";
 import { loadEnv } from "vite";
 import react from "@astrojs/react";
@@ -15,11 +17,54 @@ const RUTA_IDENTITY_DEV = "/identidad-dev";
 const { IDENTITY_URL } = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 const identityRemota = IDENTITY_URL ? new URL(IDENTITY_URL) : null;
 
+// Solo al compilar: sanitize-html es CommonJS y hace require() de htmlparser2,
+// que solo es ESM. La función de Netlify no admite require() de un módulo ESM
+// y fallaba con ERR_REQUIRE_ESM (error 500 en /escribir).
+// Se empaqueta sanitize-html con TODAS sus dependencias, no solo htmlparser2:
+// si una queda fuera, su require() se hace en tiempo de ejecución, Netlify no
+// la detecta al preparar la función, no la copia y falla con «Cannot find
+// module». La lista se calcula desde los package.json para que siga siendo
+// completa cuando sanitize-html cambie de dependencias.
+// En `astro dev` no se aplica: Vite no puede ejecutar ese CommonJS empaquetado
+// y Node ya lo admite.
+function dependenciasDe(paquete) {
+  const encontradas = new Set();
+  const pendientes = [[paquete, process.cwd()]];
+  while (pendientes.length) {
+    const [nombre, desde] = /** @type {[string, string]} */ (pendientes.pop());
+    // Como Node: primero node_modules anidados, luego los de los directorios padre.
+    let dir = desde;
+    let carpeta = null;
+    while (!carpeta) {
+      const candidata = path.join(dir, "node_modules", nombre);
+      if (fs.existsSync(path.join(candidata, "package.json"))) carpeta = candidata;
+      else if (path.dirname(dir) === dir) throw new Error(`No se encuentra ${nombre} (desde ${desde})`);
+      else dir = path.dirname(dir);
+    }
+    if (encontradas.has(nombre)) continue;
+    encontradas.add(nombre);
+    const pkg = JSON.parse(fs.readFileSync(path.join(carpeta, "package.json"), "utf8"));
+    for (const dep of Object.keys(pkg.dependencies ?? {})) pendientes.push([dep, carpeta]);
+  }
+  return [...encontradas];
+}
+
+/** @type {import("astro").AstroIntegration} */
+const empaquetarSanitizeHtml = {
+  name: "empaquetar-sanitize-html",
+  hooks: {
+    "astro:config:setup": ({ command, updateConfig }) => {
+      if (command !== "build") return;
+      updateConfig({ vite: { ssr: { noExternal: dependenciasDe("sanitize-html") } } });
+    },
+  },
+};
+
 // https://astro.build/config
 // Todas las páginas se generan estáticas; solo el panel de Keystatic
 // (/keystatic y /api/keystatic) se ejecuta en una función de Netlify.
 export default defineConfig({
-  integrations: [react(), keystatic()],
+  integrations: [react(), keystatic(), empaquetarSanitizeHtml],
   adapter: netlify({
     // Solo afecta a `astro dev`. No usamos Edge Functions y su emulación
     // descarga Deno, que falla. Blobs sigue emulado (no depende de esto).
