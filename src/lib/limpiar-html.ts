@@ -4,6 +4,7 @@
 // descarta, incluidos scripts, estilos, atributos y enlaces javascript:.
 
 import sanitizeHtml from "sanitize-html";
+import { DomUtils, parseDocument } from "htmlparser2";
 
 /** Ruta pública de una imagen subida a un borrador. */
 export const RUTA_IMAGEN = /^\/api\/imagenes\/([0-9a-f-]{36})\/([0-9a-f-]{36}\.(?:jpg|png|webp|gif))$/;
@@ -43,10 +44,16 @@ export function limpiarHtml(html: string, borradorId: string): string {
   }).trim();
 }
 
-/** Texto plano corto (título, resumen, texto alternativo): sin etiquetas y con límite. */
+/**
+ * Texto plano corto (título, resumen, texto alternativo): sin etiquetas y con límite.
+ * sanitize-html devuelve HTML («&» como «&amp;»); aquí se decodifica para guardar
+ * el texto tal cual. Siempre se muestra escapado (Astro, React) y en el
+ * frontmatter va entre comillas, así que no puede inyectar HTML.
+ */
 export function textoPlano(valor: unknown, maximo: number): string {
   if (typeof valor !== "string") return "";
-  return sanitizeHtml(valor, { allowedTags: [], allowedAttributes: {} })
+  const html = sanitizeHtml(valor, { allowedTags: [], allowedAttributes: {} });
+  return DomUtils.textContent(parseDocument(html))
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, maximo);
