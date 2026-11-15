@@ -17,12 +17,18 @@ const autores = new Map(
 );
 
 // Artículos del repositorio (publicados y borradores de Keystatic).
-const delRepositorio = (await getCollection("blog")).filter(
+const articulos = await getCollection("blog");
+const delRepositorio = articulos.filter(
   (a) => esEditor || (usuario.autor !== null && a.data.autor.id === usuario.autor),
 );
 
 // Borradores del editor propio (Netlify Blobs), ya filtrados por permiso.
-const delEditor = await listarBorradores(usuario);
+// Uno publicado deja de mostrarse cuando su artículo ya está en la web (tras
+// recompilar Netlify); hasta entonces aparece como «Publicado».
+const enLaWeb = new Set(articulos.map((a) => a.id));
+const delEditor = (await listarBorradores(usuario)).filter(
+  (b) => !(b.publicacion && enLaWeb.has(b.publicacion.slug)),
+);
 
 // Estados del flujo de revisión (borradores del editor) y del repositorio.
 type Estado = EstadoBorrador | "borrador" | "publicado";
@@ -43,7 +49,10 @@ const filas: Fila[] = [
     clave: `e-${b.id}`,
     titulo: b.titulo || "Borrador sin título",
     href: `/escribir/editar/${b.id}`,
-    autor: (b.autor && autores.get(b.autor)) || b.propietario.nombre,
+    autor: (() => {
+      const ficha = b.publicacion?.autor ?? b.autor;
+      return (ficha && autores.get(ficha)) || b.propietario.nombre;
+    })(),
     area: b.area ?? "—",
     fecha: new Date(b.actualizado),
     estado: b.estado as Estado,

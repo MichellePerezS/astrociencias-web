@@ -18,6 +18,7 @@ const VERBO: Record<EventoRevision["accion"], string> = {
   enviar: "lo envió a revisión",
   aprobar: "lo aprobó",
   devolver: "lo devolvió",
+  publicar: "lo publicó",
 };
 const fechaHora = (iso: string) =>
   new Date(iso).toLocaleString("es-EC", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Guayaquil" });

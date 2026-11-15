@@ -320,6 +320,7 @@
 .estado-revision-revision { color: var(--dorado); }
 .estado-revision-aprobado { color: var(--azul); }
 .estado-revision-devuelto { color: var(--error); }
+.estado-revision-publicado { color: var(--cosmos); background: var(--azul); border-color: var(--azul); }
 
 .comentario-revision {
   margin: 0;
@@ -380,6 +381,33 @@
   resize: vertical;
 }
 
+.form-devolver select {
+  font: inherit;
+  color: var(--texto);
+  background: var(--cosmos);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  max-width: 420px;
+}
+
+.form-devolver .ayuda {
+  font-size: 14px;
+  color: var(--texto-suave);
+}
+
+.publicacion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.publicacion p {
+  font-size: 15px;
+  color: var(--texto-suave);
+}
+
+.form-devolver select:focus,
 .form-devolver textarea:focus {
   outline: 2px solid var(--azul);
   outline-offset: 1px;

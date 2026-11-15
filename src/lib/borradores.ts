@@ -18,7 +18,7 @@ import {
   limpiarComentario,
   puedeAplicar,
   puedeEditar,
-  type Accion,
+  type AccionEstado,
   type EstadoBorrador,
   type EventoRevision,
 } from "./flujo";
@@ -42,8 +42,23 @@ export interface Borrador {
   actualizado: string;
   /** Estado en el flujo de revisión (los borradores anteriores a la fase 3 no lo tienen). */
   estado: EstadoBorrador;
-  /** Envíos, aprobaciones y devoluciones, del más antiguo al más reciente. */
+  /** Envíos, aprobaciones, devoluciones y publicación, del más antiguo al más reciente. */
   historial: EventoRevision[];
+  /** Solo si está publicado: dónde quedó en el repositorio (src/lib/publicar.ts). */
+  publicacion?: Publicacion;
+}
+
+export interface Publicacion {
+  /** Nombre del archivo en src/content/blog (sin .md) y dirección en /blog/. */
+  slug: string;
+  /** Ficha de autor con la que se publicó. */
+  autor: string;
+  /** Fecha del frontmatter (AAAA-MM-DD, hora de Ecuador). */
+  fecha: string;
+  /** null si ya estaba subido por un intento anterior (entonces urlCommit enlaza al archivo). */
+  commit: string | null;
+  /** Enlace al commit (o al archivo) en GitHub. */
+  urlCommit: string;
 }
 
 export interface BorradorConVersion {
@@ -219,7 +234,7 @@ export async function cambiarEstado(
   usuario: Usuario,
   id: string,
   versionCliente: string,
-  accion: Accion,
+  accion: AccionEstado,
   comentarioCliente: unknown,
 ): Promise<ResultadoCambioEstado> {
   const actual = await leerBorrador(usuario, id);
@@ -252,4 +267,39 @@ export async function cambiarEstado(
   const r = await tiendaBorradores().setJSON(id, borrador, { onlyIfMatch: actual.version });
   if (!r.modified || !r.etag) return { ok: false, motivo: "conflicto" };
   return { ok: true, version: r.etag, borrador };
+}
+
+/**
+ * Marca un borrador como publicado, después de subirlo a GitHub
+ * (solo lo llama publicarBorrador, que ya ha comprobado el rol y el estado).
+ * El artículo ya está en el repositorio, así que si alguien ha guardado otra
+ * versión mientras tanto no se descarta: se vuelve a leer y se reintenta.
+ */
+export async function marcarPublicado(
+  usuario: Usuario,
+  id: string,
+  publicacion: Publicacion,
+): Promise<{ version: string; borrador: Borrador }> {
+  const tienda = tiendaBorradores();
+  for (let intento = 0; intento < 3; intento++) {
+    const actual = await leerBorrador(usuario, id);
+    if (!actual) throw new Error(`El borrador ${id} ya no existe.`);
+    const ahora = new Date().toISOString();
+    const borrador: Borrador = {
+      ...actual.borrador,
+      estado: estadoTras("publicar"),
+      historial: [...actual.borrador.historial, { accion: "publicar", por: { id: usuario.id, nombre: usuario.nombre }, fecha: ahora }],
+      publicacion,
+      actualizado: ahora,
+    };
+    const r = await tienda.setJSON(id, borrador, { onlyIfMatch: actual.version });
+    if (r.modified && r.etag) return { version: r.etag, borrador };
+  }
+  throw new Error(`No se pudo marcar como publicado el borrador ${id}.`);
+}
+
+/** Lee una imagen subida a un borrador (sin comprobar permisos: lo hace quien llama). */
+export async function leerImagen(borradorId: string, archivo: string): Promise<Uint8Array | null> {
+  const datos = await tiendaImagenes().get(`${borradorId}/${archivo}`, { type: "arrayBuffer" });
+  return datos ? new Uint8Array(datos) : null;
 }

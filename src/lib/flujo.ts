@@ -7,20 +7,24 @@
 //      └───────────── devuelto ◀──────────────────┘
 //                         └──enviar──▶ revision
 //
+//   aprobado ──publicar──▶ publicado (final: el .md ya está en GitHub)
+//
 // Quién puede qué (se comprueba siempre en el servidor):
 //   enviar   → solo quien creó el borrador, desde «edicion» o «devuelto».
 //   aprobar  → solo editores, desde «revision».
 //   devolver → solo editores, desde «revision» o «aprobado», con comentario.
+//   publicar → solo editores, desde «aprobado» (src/lib/publicar.ts).
 //   editar el contenido:
 //     «edicion» y «devuelto» → el propietario y los editores;
 //     «revision»             → solo editores;
-//     «aprobado»             → nadie (hay que devolverlo antes).
+//     «aprobado»             → nadie (hay que devolverlo antes);
+//     «publicado»            → nadie (se cambia en el repositorio).
 //
 // Este módulo no depende de Blobs ni de Astro: solo reglas.
 
 import type { Usuario } from "./identidad";
 
-export const ESTADOS = ["edicion", "revision", "aprobado", "devuelto"] as const;
+export const ESTADOS = ["edicion", "revision", "aprobado", "devuelto", "publicado"] as const;
 export type EstadoBorrador = (typeof ESTADOS)[number];
 
 export const ETIQUETAS_ESTADO: Record<EstadoBorrador, string> = {
@@ -28,10 +32,19 @@ export const ETIQUETAS_ESTADO: Record<EstadoBorrador, string> = {
   revision: "En revisión",
   aprobado: "Aprobado",
   devuelto: "Devuelto",
+  publicado: "Publicado",
 };
 
-export const ACCIONES = ["enviar", "aprobar", "devolver"] as const;
+export const ACCIONES = ["enviar", "aprobar", "devolver", "publicar"] as const;
 export type Accion = (typeof ACCIONES)[number];
+
+/**
+ * Acciones que solo cambian el estado (POST /api/borradores/[id]/estado).
+ * «publicar» no está: solo la aplica publicarBorrador, después de subir el
+ * artículo a GitHub, para que nunca quede marcado como publicado sin estarlo.
+ */
+export const ACCIONES_ESTADO = ["enviar", "aprobar", "devolver"] as const;
+export type AccionEstado = (typeof ACCIONES_ESTADO)[number];
 
 /** Una entrada del historial de revisión. */
 export interface EventoRevision {
@@ -52,10 +65,11 @@ const DESTINO: Record<Accion, EstadoBorrador> = {
   enviar: "revision",
   aprobar: "aprobado",
   devolver: "devuelto",
+  publicar: "publicado",
 };
 
-export const esAccion = (valor: unknown): valor is Accion =>
-  typeof valor === "string" && (ACCIONES as readonly string[]).includes(valor);
+export const esAccionEstado = (valor: unknown): valor is AccionEstado =>
+  typeof valor === "string" && (ACCIONES_ESTADO as readonly string[]).includes(valor);
 
 /** Estado de un borrador guardado antes de la fase 3 (sin campo «estado»). */
 export const estadoDe = (valor: unknown): EstadoBorrador =>
@@ -77,6 +91,7 @@ export function puedeEditar(usuario: Usuario, borrador: BorradorFlujo): boolean 
     case "revision":
       return editor;
     case "aprobado":
+    case "publicado":
       return false;
   }
 }
@@ -94,6 +109,8 @@ export function puedeAplicar(usuario: Usuario, borrador: BorradorFlujo, accion: 
       return editor && borrador.estado === "revision";
     case "devolver":
       return editor && (borrador.estado === "revision" || borrador.estado === "aprobado");
+    case "publicar":
+      return editor && borrador.estado === "aprobado";
   }
 }
 

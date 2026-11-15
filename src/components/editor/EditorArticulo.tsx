@@ -32,6 +32,12 @@ export interface DatosIniciales {
   acciones: Accion[];
   /** Último comentario al devolverlo, si está devuelto. */
   devolucion: { comentario: string; por: string; fecha: string } | null;
+  /** Ficha de autor del propietario (preseleccionada al publicar). */
+  autor: string | null;
+  /** Fichas de autor para elegir al publicar (vacío si no puede publicar). */
+  autores: { id: string; nombre: string }[];
+  /** Dónde quedó publicado, si lo está. */
+  publicacion: { slug: string; urlCommit: string } | null;
 }
 
 interface Campos {
@@ -320,7 +326,10 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
 
   // Cambios de estado del flujo de revisión
   const [procesando, setProcesando] = useState(false);
-  const ejecutar = async (accion: Accion, comentario?: string): Promise<boolean> => {
+  const ejecutar = async (
+    accion: Accion,
+    datos: { comentario?: string; autor?: string } = {},
+  ): Promise<boolean> => {
     setProcesando(true);
     setAviso("");
     try {
@@ -333,19 +342,28 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
         setAviso("Escribe el título y el texto antes de enviarlo a revisión.");
         return false;
       }
-      const r = await fetch(`/api/borradores/${id}/estado`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accion, version: versionRef.current, comentario }),
-      });
+      // Publicar va por su propio endpoint: sube el artículo a GitHub antes de cambiar el estado.
+      const r =
+        accion === "publicar"
+          ? await fetch(`/api/borradores/${id}/publicar`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ version: versionRef.current, autor: datos.autor }),
+            })
+          : await fetch(`/api/borradores/${id}/estado`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ accion, version: versionRef.current, comentario: datos.comentario }),
+            });
       if (r.ok) {
-        // Quien envía se queda viendo su borrador (ya en solo lectura); el editor vuelve a la cola.
-        if (accion === "enviar") location.reload();
+        // Quien envía o publica se queda viendo el borrador (ya en solo lectura);
+        // el editor que aprueba o devuelve vuelve a la cola.
+        if (accion === "enviar" || accion === "publicar") location.reload();
         else location.assign("/escribir/revision");
         return true;
       }
-      const { error } = (await r.json().catch(() => ({}))) as { error?: string };
-      setAviso(mensajeAccion(r.status, error));
+      const { error, campos } = (await r.json().catch(() => ({}))) as { error?: string; campos?: string[] };
+      setAviso(mensajeAccion(r.status, error, campos));
       if (r.status === 409) {
         bloqueado.current = true;
         setEstado("conflicto");
@@ -392,6 +410,9 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
         editable={editable}
         acciones={inicial.acciones}
         devolucion={inicial.devolucion}
+        autor={inicial.autor}
+        autores={inicial.autores}
+        publicacion={inicial.publicacion}
         procesando={procesando}
         ejecutar={ejecutar}
       />
@@ -530,9 +551,31 @@ function textoEstado(estado: Estado, ultimo: string | null): string {
   }
 }
 
-/** Mensaje para un cambio de estado rechazado por el servidor. */
-function mensajeAccion(status: number, error: string | undefined): string {
+const NOMBRES_CAMPOS: Record<string, string> = {
+  titulo: "título",
+  resumen: "resumen",
+  area: "área",
+  contenido: "texto",
+};
+
+/** Mensaje para un cambio de estado o una publicación rechazados por el servidor. */
+function mensajeAccion(status: number, error: string | undefined, campos?: string[]): string {
+  if (error === "incompleto" && campos?.length) {
+    return `Para publicarlo falta: ${campos.map((c) => NOMBRES_CAMPOS[c] ?? c).join(", ")}. Devuélvelo al autor o complétalo antes de aprobarlo.`;
+  }
   if (error === "incompleto") return "Añade un título y texto antes de enviarlo a revisión.";
+  if (error === "autor") return "Elige una ficha de autor que exista en la web.";
+  if (error === "imagen") return "Falta una de las imágenes del borrador. Recarga la página e inténtalo de nuevo.";
+  if (error === "imagen-formato") {
+    return "Una de las imágenes está dañada y no se puede preparar para la web. Quítala o súbela de nuevo.";
+  }
+  if (error === "github-config") {
+    return "La publicación no está configurada en el servidor (falta el token de GitHub). Avisa a quien administra la web.";
+  }
+  if (error === "github-token" || error === "github-permisos") {
+    return "GitHub ha rechazado el token de publicación (caducado o sin permisos). Avisa a quien administra la web.";
+  }
+  if (error === "github-github") return "GitHub no ha respondido bien. Espera un momento e inténtalo de nuevo.";
   if (error === "sin-comentario") return "Escribe un comentario para el autor explicando qué debe cambiar.";
   if (status === 409) return "Alguien ha cambiado este borrador mientras tanto. Recarga la página para ver la última versión.";
   if (status === 403) return "No puedes hacer esto con el borrador en su estado actual. Recarga la página.";
@@ -546,6 +589,7 @@ const EXPLICACION: Record<EstadoBorrador, string> = {
   revision: "Los editores lo están revisando.",
   aprobado: "Aprobado y listo para publicar.",
   devuelto: "Los editores lo han devuelto con un comentario. Haz los cambios y vuelve a enviarlo.",
+  publicado: "Publicado: el artículo ya está en el repositorio. Para cambiarlo, edítalo en Keystatic.",
 };
 
 function PanelRevision({
@@ -553,6 +597,9 @@ function PanelRevision({
   editable,
   acciones,
   devolucion,
+  autor,
+  autores,
+  publicacion,
   procesando,
   ejecutar,
 }: {
@@ -560,11 +607,18 @@ function PanelRevision({
   editable: boolean;
   acciones: Accion[];
   devolucion: DatosIniciales["devolucion"];
+  autor: DatosIniciales["autor"];
+  autores: DatosIniciales["autores"];
+  publicacion: DatosIniciales["publicacion"];
   procesando: boolean;
-  ejecutar: (accion: Accion, comentario?: string) => Promise<boolean>;
+  ejecutar: (accion: Accion, datos?: { comentario?: string; autor?: string }) => Promise<boolean>;
 }) {
   const [devolviendo, setDevolviendo] = useState(false);
   const [comentario, setComentario] = useState("");
+  const [publicando, setPublicando] = useState(false);
+  const [autorElegido, setAutorElegido] = useState(
+    autor && autores.some((a) => a.id === autor) ? autor : "",
+  );
 
   const enviar = () => {
     if (window.confirm("¿Enviar a revisión? No podrás editarlo hasta que te lo devuelvan.")) {
@@ -598,11 +652,37 @@ function PanelRevision({
         </figure>
       )}
 
-      {acciones.length > 0 && !devolviendo && (
+      {publicacion && (
+        <div className="publicacion">
+          <p>
+            Netlify actualiza la web en unos minutos: hasta entonces la dirección puede dar «no encontrado».
+          </p>
+          <div className="acciones-revision">
+            <a className="boton boton-principal" href={`/blog/${publicacion.slug}`}>
+              Ver en la web
+            </a>
+            <a className="boton boton-secundario" href={publicacion.urlCommit} rel="noopener noreferrer">
+              Ver el cambio en GitHub
+            </a>
+          </div>
+        </div>
+      )}
+
+      {acciones.length > 0 && !devolviendo && !publicando && (
         <div className="acciones-revision">
           {acciones.includes("enviar") && (
             <button type="button" className="boton boton-principal" disabled={procesando} onClick={enviar}>
               Enviar a revisión
+            </button>
+          )}
+          {acciones.includes("publicar") && (
+            <button
+              type="button"
+              className="boton boton-principal"
+              disabled={procesando}
+              onClick={() => setPublicando(true)}
+            >
+              Publicar
             </button>
           )}
           {acciones.includes("aprobar") && (
@@ -628,7 +708,7 @@ function PanelRevision({
           className="form-devolver"
           onSubmit={(e) => {
             e.preventDefault();
-            void ejecutar("devolver", comentario);
+            void ejecutar("devolver", { comentario });
           }}
         >
           <label htmlFor="revision-comentario">Comentario para el autor</label>
@@ -650,6 +730,48 @@ function PanelRevision({
               className="boton boton-secundario"
               disabled={procesando}
               onClick={() => setDevolviendo(false)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {publicando && (
+        <form
+          className="form-devolver"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void ejecutar("publicar", { autor: autorElegido });
+          }}
+        >
+          <label htmlFor="publicar-autor">Autor o autora del artículo</label>
+          <select
+            id="publicar-autor"
+            required
+            value={autorElegido}
+            onChange={(e) => setAutorElegido(e.target.value)}
+          >
+            <option value="">Elige una ficha de autor</option>
+            {autores.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nombre}
+              </option>
+            ))}
+          </select>
+          <p className="ayuda">
+            Se subirá al repositorio como artículo del blog, con sus imágenes, y Netlify lo pondrá en la web en
+            unos minutos. Después ya no se podrá editar aquí.
+          </p>
+          <div className="acciones-revision">
+            <button type="submit" className="boton boton-principal" disabled={procesando || !autorElegido}>
+              {procesando ? "Publicando…" : "Publicar ahora"}
+            </button>
+            <button
+              type="button"
+              className="boton boton-secundario"
+              disabled={procesando}
+              onClick={() => setPublicando(false)}
             >
               Cancelar
             </button>
