@@ -1,37 +1,89 @@
-titulo: Divulgamos ciencia desde 2012
-entradilla: >-
-  AstroCiencias Ecuador es una asociación de divulgación científica: astronomía
-  y muchas otras ciencias, desde 2012.
-historia: >-
-  AstroCiencias Ecuador nació en enero de 2012. La fundó Carlos Silvera, su
-  director. La primera entrada del blog se publicó el 26 de enero de 2012, y la
-  página de Facebook se creó el 12 de febrero de ese mismo año.
-
-
-  En 2022, la subdirectora, la ingeniera Alexandra Naranjo, propuso crear
-  equipos para hacer actividades presenciales en varias ciudades de Ecuador.
-mision: >-
-  Queremos despertar el interés por la ciencia con una divulgación accesible,
-  clara y entretenida. Usamos un lenguaje sencillo para que las ideas complejas
-  se entiendan sin ser especialista.
-
-
-  Nuestro propósito es «acercar la ciencia a la sociedad, inspirar la curiosidad
-  y fomentar el pensamiento crítico».
-cita: Creemos que la ciencia no debe quedarse en los laboratorios ni en los libros académicos.
+cabecera:
+  etiqueta: Sobre nosotros
+  titulo: Quiénes somos
+  lema: >-
+    Divulgación científica en astronomía y más ciencias. Conectando el Universo y
+    las Ciencias con la Humanidad.
+  datos:
+    - etiqueta: Fundación
+      valor: '2012'
+    - etiqueta: Equipos presenciales
+      valor: '3'
+intro: >-
+  AstroCiencias Ecuador es una iniciativa dedicada a la divulgación científica,
+  conformada por un equipo multidisciplinario de personas apasionadas por el
+  conocimiento. Compartimos un sueño común: acercar la ciencia a la sociedad,
+  inspirar la curiosidad y fomentar el pensamiento crítico en personas de todas
+  las edades.
+historia:
+  titulo: Nuestra historia
+  texto: >-
+    Fue creada en enero de 2012 por Carlos Silvera, director de AstroCiencias
+    Ecuador, compartiendo información astronómica y científica. Su primera
+    publicación en Blogger fue el 26 de enero de 2012. El 12 de febrero de 2012
+    se creó la página de Facebook de AstroCiencias Ecuador, donde organizamos
+    observaciones astronómicas, espacios de charlas, exposiciones y entrevistas
+    con invitados de distintas ramas de la ciencia. Desde entonces hemos seguido
+    creciendo en otras redes sociales: YouTube, Instagram, X (Twitter) y,
+    últimamente, TikTok. Además, contamos con una radio virtual en la plataforma
+    Zeno, donde compartimos el audio de nuestras charlas con música variada. Todo
+    esto con el propósito de divulgar la ciencia con un enfoque digital,
+    utilizando la tecnología y la comunicación actual.
+mision:
+  titulo: Nuestra misión
+  texto: >-
+    Promover el interés por la ciencia mediante una divulgación accesible, clara
+    y entretenida. Utilizamos un lenguaje sencillo y explicativo para que
+    conceptos complejos se vuelvan comprensibles y atractivos para todo público.
+enfoque:
+  titulo: Nuestro enfoque
+  texto: >-
+    Creemos que la ciencia no debe quedarse en los laboratorios ni en los libros
+    académicos. Por eso, desarrollamos contenidos que conectan con la realidad
+    cotidiana, despertando preguntas y motivando el aprendizaje constante.
+presencia:
+  titulo: Presencia a nivel nacional
+  intro: >-
+    AstroCiencias Ecuador tiene muchos integrantes unidos por los medios
+    digitales, no solo de Ecuador sino también de otros países. A raíz del
+    aumento de integrantes en algunas ciudades, en 2022, por iniciativa de la
+    ingeniera Alexandra Naranjo, subdirectora de AstroCiencias Ecuador, se
+    decidió crear varios equipos para actividades presenciales.
+  equipos:
+    - nombre: Quito
+      estado: activo
+    - nombre: Cuenca
+      estado: activo
+    - nombre: Guayaquil
+      estado: activo
+    - nombre: Sierra centro
+      detalle: Latacunga, Ambato y Riobamba
+      estado: planificacion
 queHacemos:
-  - Contenido de divulgación en redes sociales.
-  - Charlas en directo, entrevistas y observaciones del cielo con invitados de muchas ciencias.
-  - AstroCiencias Radio.
-  - Visitas a escuelas y universidades.
-  - Campamentos de astronomía.
-  - La revista trimestral Astro&Ciencias.
-  - Un calendario astronómico anual con las fotos ganadoras de un concurso de astrofotografía.
-  - Un libro anual de efemérides astronómicas.
-dondeEstamos: >-
-  Tenemos equipos presenciales en Quito, Cuenca y Guayaquil. Hemos propuesto
-  crear otro en la Sierra centro, para Latacunga, Ambato y Riobamba.
-
-
-  También hay miembros de ACE en otros países.
-contacto: Escríbenos por correo o por WhatsApp.
+  titulo: Qué hacemos
+  actividades:
+    - Participamos como invitados en escuelas, universidades e instituciones.
+    - Organizamos visitas a escuelas para compartir nuestros conocimientos astronómicos y científicos.
+    - Organizamos campamentos astronómicos en distintos lugares de Ecuador.
+    - Publicamos la revista trimestral de divulgación científica Astro&Ciencias.
+    - Editamos cada año un calendario astronómico con las mejores fotografías de nuestro concurso anual de astrofotografía.
+    - Publicamos nuestro libro anual de efemérides astronómicas.
+  cierre: >-
+    Con el fin de promover la divulgación científica para Ecuador e
+    Hispanoamérica, en todas nuestras publicaciones colaboran nuestros
+    integrantes.
+equipo:
+  titulo: Liderazgo y coordinación
+  personas:
+    - nombre: Carlos Silvera
+      cargo: Fundador y director
+    - nombre: Ing. Alexandra Naranjo
+      cargo: Subdirectora
+llamada:
+  titulo: ¿Te gustaría ser parte de nuestra comunidad?
+  botonPrincipal:
+    texto: Únete como voluntario
+    enlace: /colabora
+  botonSecundario:
+    texto: Ver próximas actividades
+    enlace: /eventos

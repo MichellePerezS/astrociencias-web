@@ -1,0 +1,25 @@
+titulo: Haz ciencia con nosotros
+entradilla: Súmate como voluntario, propón una colaboración o apóyanos.
+voluntariado:
+  titulo: Hazte voluntario
+  cita: >-
+    No importa si eres un astrónomo aficionado, un entusiasmado por la ciencia o
+    simplemente alguien curioso, todos son bienvenidos en AstroCiencias Ecuador.
+  introLista: 'Como voluntario o voluntaria podrás:'
+  actividades:
+    - Participar en observaciones astronómicas del cielo.
+    - Aprender de expertos y aficionados en astronomía y otras ciencias.
+    - Compartir tu entusiasmo y tus conocimientos.
+    - Explorar la ciencia en charlas, talleres y eventos.
+  boton: Escríbenos
+  asunto: Quiero ser voluntario/a
+colaboraciones:
+  titulo: Colaboraciones
+  texto: >-
+    ¿Quieres que vayamos a tu escuela, colegio o universidad? ¿Tienes otra idea
+    para colaborar con nosotros? Escríbenos y lo hablamos.
+  boton: Proponer una colaboración
+  asunto: Colaboración con AstroCiencias Ecuador
+apoyo:
+  titulo: Apóyanos
+  texto: Pronto podrás apoyarnos con una donación.

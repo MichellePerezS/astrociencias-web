@@ -1,0 +1,197 @@
+---
+import { getEntry } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { CORREO } from "../../content/contacto";
+
+// Colabora: voluntariado, colaboraciones (visitas a centros educativos y otras
+// propuestas) y donaciones (próximamente).
+// El texto se edita en Keystatic (singleton «Colabora», en «Páginas»):
+// src/content/paginas/colabora.yaml.
+const pagina = await getEntry("colabora", "colabora");
+if (!pagina) throw new Error("Falta src/content/paginas/colabora.yaml");
+const { titulo, entradilla, voluntariado, colaboraciones, apoyo } = pagina.data;
+
+const correoCon = (asunto: string) => `mailto:${CORREO}?subject=${encodeURIComponent(asunto)}`;
+
+// Iconos de línea (viewBox 0 0 24 24), del mismo estilo que los de /recursos.
+const ICONOS = {
+  voluntariado:
+    '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.2A4.5 4.5 0 0 1 21 18.5"/>',
+  // Edificio escolar con tejado y bandera.
+  colaboraciones:
+    '<path d="M3 21h18"/><path d="M5 21V11l7-4 7 4v10"/><path d="M10 21v-5h4v5"/><path d="M12 7V3l3 1.2L12 5.4"/>',
+  apoyo:
+    '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+};
+---
+
+<Base title="Colabora" description={entradilla}>
+  <section class="contenedor encabezado">
+    <p class="etiqueta">// Colabora</p>
+    <h1>{titulo}</h1>
+    <p class="entradilla">{entradilla}</p>
+  </section>
+
+  <section class="contenedor lista" aria-label="Formas de colaborar">
+    <ul class="tarjetas">
+      <li>
+        <article class="tarjeta" aria-labelledby="t-voluntariado">
+          <svg class="icono" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={ICONOS.voluntariado} />
+          <h2 id="t-voluntariado">{voluntariado.titulo}</h2>
+          <blockquote class="cita">
+            <p>«{voluntariado.cita}»</p>
+          </blockquote>
+          <p>{voluntariado.introLista}</p>
+          <ul class="actividades">
+            {voluntariado.actividades.map((a) => <li>{a}</li>)}
+          </ul>
+          <div class="final">
+            <a class="boton boton-principal" href={correoCon(voluntariado.asunto)}>{voluntariado.boton}</a>
+          </div>
+        </article>
+      </li>
+
+      <li>
+        <article class="tarjeta" aria-labelledby="t-colaboraciones">
+          <svg class="icono" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={ICONOS.colaboraciones} />
+          <h2 id="t-colaboraciones">{colaboraciones.titulo}</h2>
+          <p>{colaboraciones.texto}</p>
+          <div class="final">
+            <a class="boton boton-secundario" href={correoCon(colaboraciones.asunto)}>{colaboraciones.boton}</a>
+          </div>
+        </article>
+      </li>
+
+      <li>
+        <article class="tarjeta" aria-labelledby="t-apoyo">
+          <svg class="icono" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={ICONOS.apoyo} />
+          <h2 id="t-apoyo">{apoyo.titulo}</h2>
+          <p>{apoyo.texto}</p>
+          <div class="final">
+            <span class="marca">Próximamente</span>
+          </div>
+        </article>
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  /* Cabecera como en /blog, /autores, /recursos y /quienes-somos. */
+  .encabezado {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 72px var(--space-12);
+  }
+
+  h1 {
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    max-width: 760px;
+  }
+
+  .entradilla {
+    font-size: 19px;
+    color: var(--texto-suave);
+    max-width: 620px;
+  }
+
+  .lista {
+    padding-bottom: var(--space-24);
+  }
+
+  /* Una columna en móvil y tableta; tres en escritorio. */
+  .tarjetas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (min-width: 900px) {
+    .tarjetas {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .tarjetas > li {
+    display: flex;
+  }
+
+  .tarjeta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: var(--space-6);
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+  }
+
+  .icono {
+    color: var(--azul);
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.25;
+  }
+
+  .tarjeta p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--texto-suave);
+  }
+
+  .cita {
+    margin: 0;
+  }
+
+  .tarjeta .cita p {
+    font-family: var(--font-titulos);
+    font-size: 17px;
+    line-height: 1.45;
+    color: var(--dorado);
+  }
+
+  .actividades {
+    margin: 0;
+    padding-left: 1.2em;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--texto);
+  }
+
+  .actividades li::marker {
+    color: var(--azul);
+  }
+
+  /* El botón o la marca, siempre al pie de la tarjeta (las tres se alinean). */
+  .final {
+    margin-top: auto;
+    padding-top: 8px;
+  }
+
+  .marca {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dorado);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+  }
+</style>

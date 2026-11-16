@@ -26,7 +26,7 @@ const actual = (href: string) =>
 
     <nav aria-label="Principal" class="menu">
       {enlaces.map((e) => <a href={e.href} aria-current={actual(e.href)}>{e.texto}</a>)}
-      <a href="/#colabora" class="colabora">Colabora</a>
+      <a href="/colabora" class="colabora" aria-current={actual("/colabora")}>Colabora</a>
     </nav>
   </div>
 </header>
@@ -97,5 +97,14 @@ const actual = (href: string) =>
   .menu .colabora:hover {
     color: var(--cosmos);
     background: #d9cdb0;
+  }
+
+  /* En /colabora el botón sigue legible (el dorado de «página actual» no vale
+     sobre fondo dorado): se marca con un subrayado. */
+  .menu .colabora[aria-current="page"] {
+    color: var(--cosmos);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
   }
 </style>

@@ -1,13 +1,12 @@
 ---
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
-import { CORREO, WHATSAPP } from "../content/contacto";
 
-// Quiénes somos. El texto se edita en Keystatic (singleton «Quiénes somos»,
-// src/content/paginas/quienes-somos.yaml). El equipo se añadirá más adelante.
-const pagina = await getEntry("paginas", "quienes-somos");
+// Quiénes somos. Todo el texto se edita en Keystatic (singleton «Quiénes somos»,
+// en «Páginas»): src/content/paginas/quienes-somos.yaml.
+const pagina = await getEntry("quienesSomos", "quienes-somos");
 if (!pagina) throw new Error("Falta src/content/paginas/quienes-somos.yaml");
-const { titulo, entradilla, historia, mision, cita, queHacemos, dondeEstamos, contacto } = pagina.data;
+const { cabecera, intro, historia, mision, enfoque, presencia, queHacemos, equipo, llamada } = pagina.data;
 
 /** Párrafos de un texto de varias líneas: una línea en blanco separa párrafos. */
 const parrafos = (texto: string) =>
@@ -15,79 +14,194 @@ const parrafos = (texto: string) =>
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
     .filter(Boolean);
+
+/** Iniciales para el avatar sin foto, sin contar tratamientos como «Ing.» o «Dr.». */
+const iniciales = (nombre: string) =>
+  nombre
+    .split(/\s+/)
+    .filter((p) => p && !p.endsWith("."))
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join("");
+
+const ESTADOS = {
+  activo: "Equipo activo",
+  planificacion: "En planificación",
+} as const;
+
+const numero = (i: number) => String(i + 1).padStart(2, "0");
 ---
 
-<Base title="Quiénes somos" description={entradilla}>
+<Base title="Quiénes somos" description={cabecera.lema}>
+  <!-- 1. Cabecera -->
   <section class="contenedor encabezado">
-    <p class="etiqueta">// Quiénes somos</p>
-    <h1>{titulo}</h1>
-    <p class="entradilla">{entradilla}</p>
+    <div class="titulos">
+      <p class="etiqueta">// {cabecera.etiqueta}</p>
+      <h1>{cabecera.titulo}</h1>
+      <p class="entradilla">{cabecera.lema}</p>
+    </div>
+    {
+      cabecera.datos.length > 0 && (
+        <dl class="datos">
+          {cabecera.datos.map((d) => (
+            <div>
+              <dt>{d.etiqueta}</dt>
+              <dd>{d.valor}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
   </section>
 
-  <div class="contenedor cuerpo">
-    <section aria-labelledby="t-historia">
-      <h2 id="t-historia">Historia</h2>
-      {parrafos(historia).map((p) => <p>{p}</p>)}
-    </section>
+  <!-- 2. Introducción -->
+  <section class="contenedor intro" aria-label="Introducción">
+    {parrafos(intro).map((p) => <p>{p}</p>)}
+  </section>
 
-    <section aria-labelledby="t-mision">
-      <h2 id="t-mision">Misión</h2>
+  <!-- 3. Historia, misión y enfoque -->
+  <section class="contenedor bloque-doble" aria-label="Historia, misión y enfoque">
+    <article class="tarjeta historia" aria-labelledby="t-historia">
+      <div class="cabecera-historia">
+        <h2 id="t-historia">{historia.titulo}</h2>
+        <svg class="reticula" aria-hidden="true" width="64" height="64" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="50" cy="50" r="45" stroke-dasharray="4 6"></circle>
+          <circle cx="50" cy="50" r="26"></circle>
+          <path d="M50 2v20M50 78v20M2 50h20M78 50h20"></path>
+          <circle cx="50" cy="50" r="5" fill="currentColor"></circle>
+        </svg>
+      </div>
+      {parrafos(historia.texto).map((p) => <p>{p}</p>)}
+    </article>
+
+    <div class="pila">
+      <article class="tarjeta" aria-labelledby="t-mision">
+        <div class="cabecera-tarjeta">
+          <span class="icono-caja" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+            </svg>
+          </span>
+          <h2 id="t-mision">{mision.titulo}</h2>
+        </div>
+        {parrafos(mision.texto).map((p) => <p>{p}</p>)}
+      </article>
+
+      <article class="tarjeta" aria-labelledby="t-enfoque">
+        <div class="cabecera-tarjeta">
+          <span class="icono-caja dorado" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+          <h2 id="t-enfoque">{enfoque.titulo}</h2>
+        </div>
+        {parrafos(enfoque.texto).map((p) => <p>{p}</p>)}
+      </article>
+    </div>
+  </section>
+
+  <!-- 4. Presencia a nivel nacional -->
+  <section class="banda" aria-labelledby="t-presencia">
+    <div class="contenedor">
+      <div class="cabecera-seccion">
+        <h2 id="t-presencia">{presencia.titulo}</h2>
+        {parrafos(presencia.intro).map((p) => <p>{p}</p>)}
+      </div>
+      <ul class="rejilla equipos">
+        {
+          presencia.equipos.map((e) => (
+            <li class="tarjeta equipo">
+              <div class="fila-equipo">
+                <span class:list={["estado", e.estado]}>{ESTADOS[e.estado]}</span>
+                <svg class="pin" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle>
+                </svg>
+              </div>
+              <h3>{e.nombre}</h3>
+              {e.detalle && <p class="detalle">{e.detalle}</p>}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Qué hacemos -->
+  <section class="contenedor seccion" aria-labelledby="t-hacemos">
+    <h2 id="t-hacemos">{queHacemos.titulo}</h2>
+    <ol class="rejilla actividades">
       {
-        cita && (
-          <blockquote class="cita">
-            <p>«{cita}»</p>
-          </blockquote>
-        )
+        queHacemos.actividades.map((a, i) => (
+          <li class="tarjeta actividad">
+            <span class="numero" aria-hidden="true">{numero(i)}</span>
+            <p>{a}</p>
+          </li>
+        ))
       }
-      {parrafos(mision).map((p) => <p>{p}</p>)}
-    </section>
+    </ol>
+    {queHacemos.cierre && <p class="cierre">{queHacemos.cierre}</p>}
+  </section>
 
-    <section aria-labelledby="t-hacemos">
-      <h2 id="t-hacemos">Qué hacemos</h2>
-      <ul class="actividades">
-        {queHacemos.map((a) => <li>{a}</li>)}
-      </ul>
-      <p>
-        <a href="/recursos">Revista, podcast, radio y charlas en Recursos</a>
-      </p>
-    </section>
+  <!-- 6. Liderazgo y coordinación -->
+  <section class="contenedor seccion" aria-labelledby="t-equipo">
+    <h2 id="t-equipo">{equipo.titulo}</h2>
+    <ul class="rejilla personas">
+      {
+        equipo.personas.map((p) => (
+          <li class="tarjeta persona">
+            {p.foto ? (
+              <img src={p.foto} alt="" class="avatar" width="64" height="64" loading="lazy" />
+            ) : (
+              <span class="avatar" aria-hidden="true">{iniciales(p.nombre)}</span>
+            )}
+            <div>
+              <h3>{p.nombre}</h3>
+              <p class="cargo">{p.cargo}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
 
-    <section aria-labelledby="t-donde">
-      <h2 id="t-donde">Dónde estamos</h2>
-      {parrafos(dondeEstamos).map((p) => <p>{p}</p>)}
-    </section>
-
-    <section aria-labelledby="t-contacto">
-      <h2 id="t-contacto">Contacto</h2>
-      {parrafos(contacto).map((p) => <p>{p}</p>)}
-      <ul class="contacto">
-        <li>
-          <span class="dato">Correo</span>
-          <a href={`mailto:${CORREO}`}>{CORREO}</a>
-        </li>
-        <li>
-          <span class="dato">WhatsApp</span>
-          <a href={WHATSAPP.href}>{WHATSAPP.texto}</a>
-        </li>
-      </ul>
-    </section>
-  </div>
+  <!-- 7. Llamada final -->
+  <section class="contenedor seccion final" aria-labelledby="t-llamada">
+    <div class="llamada">
+      <div>
+        <h2 id="t-llamada">{llamada.titulo}</h2>
+        {llamada.texto && <p>{llamada.texto}</p>}
+      </div>
+      <div class="botones">
+        <a class="boton boton-principal" href={llamada.botonPrincipal.enlace}>{llamada.botonPrincipal.texto}</a>
+        <a class="boton boton-secundario" href={llamada.botonSecundario.enlace}>{llamada.botonSecundario.texto}</a>
+      </div>
+    </div>
+  </section>
 </Base>
 
 <style>
-  /* Cabecera como en /blog, /autores y /recursos. */
+  /* 1. Cabecera: como las demás páginas interiores, con los datos a la derecha. */
   .encabezado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6) var(--space-12);
+    padding-block: 72px var(--space-12);
+  }
+
+  .titulos {
+    flex: 1 1 520px;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    padding-block: 72px var(--space-12);
   }
 
   h1 {
     font-size: clamp(36px, 5vw, 52px);
     font-weight: 700;
     letter-spacing: -0.02em;
-    max-width: 760px;
   }
 
   .entradilla {
@@ -96,92 +210,400 @@ const parrafos = (texto: string) =>
     max-width: 620px;
   }
 
-  /* Texto en una columna de lectura cómoda. */
-  .cuerpo {
-    display: flex;
-    flex-direction: column;
-    gap: 56px;
-    padding-bottom: var(--space-24);
-  }
-
-  .cuerpo section {
-    max-width: 720px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  h2 {
-    font-weight: 600;
-    font-size: clamp(22px, 3vw, 26px);
-    padding-top: var(--space-6);
-    border-top: 1px solid var(--linea);
-  }
-
-  .cuerpo p {
+  .datos {
     margin: 0;
-    font-size: 17px;
-    line-height: 1.65;
-    color: var(--texto);
-  }
-
-  .cita {
-    margin: 0;
-    padding: var(--space-6);
+    display: flex;
     background: var(--cosmos-2);
     border: 1px solid var(--linea);
     border-radius: var(--radius-md);
   }
 
-  .cuerpo .cita p {
-    font-family: var(--font-titulos);
-    font-size: clamp(19px, 2.4vw, 22px);
-    line-height: 1.4;
-    color: var(--dorado);
-  }
-
-  .actividades {
-    margin: 0;
-    padding-left: 1.2em;
+  .datos div {
+    padding: 14px 24px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    font-size: 17px;
-    line-height: 1.55;
+    gap: 2px;
   }
 
-  .actividades li::marker {
-    color: var(--azul);
+  .datos div + div {
+    border-left: 1px solid var(--linea);
   }
 
-  .contacto {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .contacto li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 12px;
-    min-height: 44px;
-    font-size: 17px;
-  }
-
-  .dato {
-    min-width: 84px;
+  .datos dt {
     font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    color: var(--texto-tenue);
+  }
+
+  .datos dd {
+    margin: 0;
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 24px;
     color: var(--dorado);
   }
 
-  .contacto a {
-    overflow-wrap: anywhere;
+  .datos div + div dd {
+    color: var(--azul);
+  }
+
+  /* 2. Introducción */
+  .intro {
+    padding-bottom: var(--space-12);
+  }
+
+  .intro p {
+    max-width: 820px;
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--texto);
+  }
+
+  .intro p + p {
+    margin-top: var(--space-4);
+  }
+
+  /* Tarjetas */
+  .tarjeta {
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+
+  .tarjeta p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--texto-suave);
+  }
+
+  .tarjeta p + p {
+    margin-top: 12px;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: clamp(24px, 3vw, 30px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  /* 3. Historia (grande) + misión y enfoque (apiladas) */
+  .bloque-doble {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-bottom: 72px;
+  }
+
+  @media (min-width: 960px) {
+    .bloque-doble {
+      grid-template-columns: 7fr 5fr;
+    }
+  }
+
+  .historia {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .cabecera-historia {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .historia h2 {
+    font-size: clamp(22px, 2.6vw, 26px);
+  }
+
+  .historia p + p {
+    margin-top: 0;
+  }
+
+  /* Decoración junto al título, sin tocar el texto. */
+  .reticula {
+    flex: none;
+    color: var(--azul);
+    opacity: 0.4;
+  }
+
+  .pila {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .pila .tarjeta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cabecera-tarjeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cabecera-tarjeta h2 {
+    font-size: 20px;
+  }
+
+  .icono-caja {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    background: var(--cosmos-3);
+    color: var(--azul);
+  }
+
+  .icono-caja.dorado {
+    color: var(--dorado);
+  }
+
+  /* 4. Presencia: banda con fondo propio */
+  .banda {
+    background: var(--cosmos-2);
+    border-block: 1px solid var(--linea);
+    padding-block: 72px;
+  }
+
+  .cabecera-seccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 760px;
+    margin-bottom: 32px;
+  }
+
+  .cabecera-seccion p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--texto-suave);
+  }
+
+  .rejilla {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 20px;
+  }
+
+  .equipos {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 560px) {
+    .equipos {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .equipos {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .equipo {
+    background: var(--cosmos);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .fila-equipo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .estado {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .estado.activo,
+  .equipo:has(.activo) .pin {
+    color: var(--azul);
+  }
+
+  .estado.planificacion,
+  .equipo:has(.planificacion) .pin {
+    color: var(--dorado);
+  }
+
+  .equipo h3 {
+    font-size: 22px;
+  }
+
+  .equipo .detalle {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--texto-suave);
+  }
+
+  /* 5 y 6. Secciones */
+  .seccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-top: 72px;
+  }
+
+  .actividades {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .actividades {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .actividades {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .actividad {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .numero {
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--azul);
+  }
+
+  .actividad:nth-child(3n + 2) .numero {
+    color: var(--dorado);
+  }
+
+  .actividad p {
+    color: var(--texto);
+  }
+
+  .cierre {
+    max-width: 760px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--texto-suave);
+  }
+
+  .personas {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+
+  .persona {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .avatar {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: grid;
+    place-items: center;
+    background: var(--cosmos-3);
+    border: 1px solid var(--linea-fuerte);
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--dorado);
+  }
+
+  .persona h3 {
+    font-size: 18px;
+  }
+
+  .persona .cargo {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--azul);
+  }
+
+  /* 7. Llamada final */
+  .final {
+    padding-bottom: var(--space-24);
+  }
+
+  .llamada {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: 32px;
+    background: var(--cosmos-3);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-lg);
+  }
+
+  .llamada p {
+    margin-top: 8px;
+    color: var(--texto-suave);
+    max-width: 560px;
+  }
+
+  .botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .datos {
+      width: 100%;
+    }
+
+    .datos div {
+      flex: 1;
+      padding: 12px 16px;
+    }
+
+    .historia,
+    .llamada {
+      padding: var(--space-6);
+    }
+
+    .banda {
+      padding-block: 56px;
+    }
+
+    .seccion {
+      padding-top: 56px;
+    }
   }
 </style>
