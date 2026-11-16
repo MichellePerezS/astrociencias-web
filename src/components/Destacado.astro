@@ -1,0 +1,160 @@
+---
+// Tarjeta grande de la portada. Recibe un `Destacado` (src/lib/destacado.ts):
+// hoy, el último artículo; más adelante, el próximo evento cuando lo haya.
+import type { Destacado } from "../lib/destacado";
+
+interface Props {
+  destacado: Destacado;
+}
+
+const { destacado } = Astro.props;
+const { tipo, categoria, meta, titulo, resumen, imagen, imagenAlt, boton } = destacado;
+const etiqueta = tipo === "evento" ? "Próximo evento" : "Destacado";
+---
+
+<section class="contenedor destacado" aria-labelledby="destacado-titulo">
+  <p class="etiqueta">// {etiqueta}</p>
+
+  <article class="tarjeta">
+    <div class="imagen">
+      {
+        imagen ? (
+          <img src={imagen} alt={imagenAlt ?? ""} />
+        ) : (
+          <svg aria-hidden="true" viewBox="0 0 240 240">
+            <circle cx="120" cy="120" r="100" fill="none" stroke="var(--linea-fuerte)" stroke-width="2" stroke-dasharray="3 7" />
+            <circle cx="120" cy="120" r="58" fill="none" stroke="var(--dorado)" stroke-width="3" />
+            <circle cx="220" cy="120" r="7" fill="var(--azul)" />
+            <circle cx="62" cy="62" r="4" fill="var(--texto)" />
+          </svg>
+        )
+      }
+    </div>
+
+    <div class="cuerpo">
+      <span class="categoria">{categoria}</span>
+      <h2 id="destacado-titulo">{titulo}</h2>
+      <p class="resumen">{resumen}</p>
+      <p class="meta">
+        {meta.map((m, i) => (i === 0 ? <span>{m}</span> : <span><span aria-hidden="true">·</span> {m}</span>))}
+      </p>
+      <div class="acciones">
+        <a href={boton.enlace} class="boton boton-principal">
+          {boton.texto}<span aria-hidden="true">{" →"}</span>
+        </a>
+      </div>
+    </div>
+  </article>
+</section>
+
+<style>
+  .destacado {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 56px 24px;
+  }
+
+  .tarjeta {
+    display: grid;
+    grid-template-columns: 1fr;
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  /* Imagen a la izquierda (algo más ancha) en escritorio; arriba en móvil. */
+  @media (min-width: 860px) {
+    .tarjeta {
+      grid-template-columns: 7fr 5fr;
+    }
+  }
+
+  .imagen {
+    aspect-ratio: 16 / 9;
+    background: var(--cosmos-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 860px) {
+    .imagen {
+      aspect-ratio: auto;
+      min-height: 380px;
+    }
+  }
+
+  .imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .imagen svg {
+    width: 45%;
+    max-width: 220px;
+  }
+
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-4);
+    padding: clamp(24px, 4vw, 48px);
+    min-width: 0;
+  }
+
+  .categoria {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dorado);
+  }
+
+  h2 {
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    overflow-wrap: break-word;
+  }
+
+  .resumen {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--texto-suave);
+  }
+
+  .meta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--texto-tenue);
+  }
+
+  .acciones {
+    margin-top: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .destacado {
+      padding-block: 32px 8px;
+    }
+
+    .resumen {
+      font-size: 17px;
+    }
+
+    .acciones .boton {
+      display: block;
+      text-align: center;
+    }
+  }
+</style>

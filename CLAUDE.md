@@ -61,12 +61,12 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - Sin degradados morados ni emojis. Accesible: contraste 4.5:1, enlaces y botones reales, textos alternativos.
 
 ## Portada (orden de secciones)
-1. Héroe: «Explorando ciencia y tecnología desde el cosmos», botones «Leer el blog» y «Únete como voluntario».
-2. Barra de próximo evento.
-3. Áreas: Astronomía y astrofísica, Física y química, Biología y salud, Ciencias de la Tierra, Tecnología e IA, Mujer y niña en la ciencia.
-4. Últimos artículos del blog (desde la colección).
-5. Colabora: voluntariado y donaciones.
-6. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
+Portada simplificada (de momento solo dos bloques, más el pie):
+1. «Destacado» (`src/components/Destacado.astro`): una tarjeta grande con imagen, título, resumen y botón. Lo decide `obtenerDestacado()` en `src/lib/destacado.ts`: el próximo evento si existe (`proximoEvento()`, que aún devuelve null porque no hay fuente de eventos) y, si no, el último artículo publicado. El componente solo recibe el tipo `Destacado`, así que para los eventos basta con implementar `proximoEvento()`.
+2. Últimos artículos del blog (`UltimosArticulos.astro`): los tres más recientes sin repetir el del destacado (prop `excluir`).
+3. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
+
+La portada no muestra un título visible: lleva un `h1` solo para lectores de pantalla.
 
 Los recursos no van en la portada: tienen su propia página, `/recursos`.
 

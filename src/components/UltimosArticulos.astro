@@ -1,11 +1,16 @@
 ---
-// Portada: los tres artículos publicados más recientes.
-// Nunca muestra borradores, tampoco en `astro dev` (articulosPublicados los
-// incluye en desarrollo para poder revisarlos en /blog).
+// Portada: los tres artículos publicados más recientes, sin el que ya sale en
+// «Destacado» (`excluir`). Nunca muestra borradores, tampoco en `astro dev`.
 import TarjetaArticulo from "./TarjetaArticulo.astro";
-import { articulosPublicados } from "../lib/blog";
+import { ultimosArticulos } from "../lib/destacado";
 
-const ultimos = (await articulosPublicados()).filter((a) => !a.data.borrador).slice(0, 3);
+interface Props {
+  /** Id del artículo que no se repite (el del bloque «Destacado»). */
+  excluir?: string;
+}
+
+const { excluir } = Astro.props;
+const ultimos = (await ultimosArticulos()).filter((a) => a.id !== excluir).slice(0, 3);
 ---
 
 {
