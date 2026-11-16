@@ -34,9 +34,11 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
     - Editar: propietario y editores en `edicion`/`devuelto`; solo editores en `revision`; nadie en `aprobado` (403).
     - `POST /api/borradores/[id]/estado` con `{ accion, version, comentario? }`; con versión antigua, 409. Cada acción queda en `historial`.
     - Cola de editores en `/escribir/revision`, con los más antiguos primero y la marca «Reenviado».
-  - Fase 4: publicación. Un editor pulsa «Publicar» en un borrador `aprobado` → `POST /api/borradores/[id]/publicar` (`{ version, autor }`) → `src/lib/publicar.ts`:
+  - Fase 4: publicación. Un editor pulsa «Publicar» en un borrador `aprobado` → `POST /api/borradores/[id]/publicar` (`{ version }`) → `src/lib/publicar.ts`:
     - Solo editores y solo desde `aprobado`, comprobado en el servidor. `/estado` no acepta `publicar`: el estado `publicado` solo se pone después de subir a GitHub. `publicado` es final: nadie edita ni devuelve.
-    - Exige título, resumen, área, texto y una ficha de `src/content/autores` (el editor la elige; por defecto, la del propietario).
+    - Exige título, resumen, área y texto.
+    - El autor es siempre la ficha del rol `autor:<ficha>` de quien creó el borrador (`Borrador.autor`, en `src/lib/firma.ts`); nadie lo elige y el servidor ignora cualquier autor que mande el navegador. Se muestra como texto en el editor, la cola y el diálogo de publicar. Los editores también pueden tener `autor:<ficha>` (solo firma, no cambia permisos). `Borrador.autor` se actualiza cada vez que el propietario guarda o envía.
+    - Sin ficha (`sin-ficha`) o con una que no existe en `src/content/autores` (`ficha-inexistente`) no se publica (422): un editor debe asignar el rol `autor:<ficha>` en Netlify Identity y devolver el borrador para que su creador lo reenvíe.
     - Convierte el HTML a Markdown (`src/lib/markdown.ts`, escapa la sintaxis de Markdown) con el frontmatter del esquema del blog, `fecha` = hoy en Ecuador y `borrador: false`.
     - Imágenes (`src/lib/optimizar-imagen.ts`): máximo 1600 px de ancho y WebP (calidad 82, bajando hasta 60 si pasa de 300 KB); los GIF van tal cual. Códecs de @jsquash en WebAssembly incrustados con `?inline` (no sharp: sin binarios nativos) y reducción propia en JavaScript, fila a fila, para no acercarse al límite de 1024 MB de la función.
     - Un solo commit en la rama con `src/content/blog/<slug>.md` y `public/images/blog/<slug>/…` (`src/lib/github.ts`, Git Data API). Si el slug existe, `-2`, `-3`…; si el .md idéntico ya existe (reintento), no vuelve a subirlo. Si la rama avanza, reintenta sin forzar. Netlify recompila con el commit.
@@ -66,6 +68,7 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 ## Reglas
 - Todo el texto en español.
 - Excepción: los mensajes de commit se escriben en inglés.
+- Nunca ejecutes `git add`, `git commit` ni `git push`: Michelle lo hace ella misma. Al terminar un cambio, enumera los archivos modificados y propón un mensaje de commit breve en inglés.
 - No inventes datos de la asociación: usa marcadores entre corchetes, como [Texto de presentación].
 - El calendario de eventos calculado automáticamente queda FUERA de esta web: es parte del TFG de Michelle y se conectará más adelante mediante una API. Aquí los eventos se escriben a mano.
 - Al migrar desde Blogger, conserva las URL antiguas con redirecciones en Netlify.

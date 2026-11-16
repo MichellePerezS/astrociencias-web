@@ -7,6 +7,9 @@
 //   "editor"          → ve y gestiona todos los artículos.
 //   "autor"           → ve solo sus artículos...
 //   "autor:<slug>"    → ...los que citan a src/content/autores/<slug>.yaml.
+//                       También es la firma de lo que publica quien lo tiene,
+//                       sea autor o editor (src/lib/publicar.ts): sin él, sus
+//                       borradores no se pueden publicar.
 //
 // Todo se comprueba aquí, en el servidor: el token del navegador se valida
 // contra Netlify Identity en cada petición.
@@ -22,7 +25,7 @@ export interface Usuario {
   correo: string;
   nombre: string;
   rol: Rol;
-  /** Slug del autor en la colección «autores» (solo para el rol autor). */
+  /** Ficha en la colección «autores» (rol «autor:<slug>»), de autores y editores. */
   autor: string | null;
 }
 
@@ -51,12 +54,11 @@ interface UsuarioIdentity {
 /** Convierte los roles de app_metadata en el rol de la aplicación. */
 export function rolDesdeMetadatos(roles: unknown): { rol: Rol; autor: string | null } | null {
   const lista = Array.isArray(roles) ? roles.filter((r): r is string => typeof r === "string") : [];
-  if (lista.includes("editor")) return { rol: "editor", autor: null };
-  if (lista.includes("autor")) {
-    const vinculo = lista.find((r) => r.startsWith("autor:"));
-    const slug = vinculo?.slice("autor:".length).trim() || null;
-    return { rol: "autor", autor: slug };
-  }
+  const vinculo = lista.find((r) => r.startsWith("autor:"));
+  const slug = vinculo?.slice("autor:".length).trim() || null;
+  // Un editor con ficha la conserva: firma lo que escribe (no cambia sus permisos).
+  if (lista.includes("editor")) return { rol: "editor", autor: slug };
+  if (lista.includes("autor")) return { rol: "autor", autor: slug };
   return null;
 }
 

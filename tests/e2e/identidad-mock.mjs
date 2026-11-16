@@ -4,7 +4,10 @@
 
 import http from "node:http";
 
-/** Token de la cookie → usuario de Identity. */
+/**
+ * Token de la cookie → usuario de Identity. Las pruebas pueden cambiar los
+ * roles mientras se ejecutan (el servidor los consulta en cada petición).
+ */
 export const USUARIOS = {
   "token-autor": {
     id: "e2e-autor",
@@ -17,6 +20,13 @@ export const USUARIOS = {
     email: "editora@example.com",
     user_metadata: { full_name: "Editora E2E" },
     app_metadata: { roles: ["editor"] },
+  },
+  // Autor cuyo rol apunta a una ficha que no existe en src/content/autores.
+  "token-autor-ficha-mala": {
+    id: "e2e-autor-ficha-mala",
+    email: "otro@example.com",
+    user_metadata: { full_name: "Autor Sin Ficha Real" },
+    app_metadata: { roles: ["autor", "autor:no-existe"] },
   },
 };
 

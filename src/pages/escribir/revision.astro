@@ -18,7 +18,9 @@ const enviado = (b: Borrador) =>
   new Date(b.historial.findLast((e) => e.accion === "enviar")?.fecha ?? b.actualizado);
 /** ¿Se había devuelto antes? (es un reenvío) */
 const reenviado = (b: Borrador) => b.historial.some((e) => e.accion === "devolver");
-const autorDe = (b: Borrador) => (b.autor && autores.get(b.autor)) || b.propietario.nombre;
+// Autor con el que se publicará: la ficha del rol «autor:<ficha>» de quien lo creó
+// (src/lib/firma.ts). Sin ficha válida no se puede publicar: se marca aquí.
+const autorDe = (b: Borrador) => (b.autor ? autores.get(b.autor) : undefined) ?? null;
 
 // Los más antiguos primero: llevan más tiempo esperando.
 const cola = borradores
@@ -61,7 +63,13 @@ const aprobados = borradores
                     <a href={`/escribir/editar/${b.id}`}>{b.titulo || "Borrador sin título"}</a>
                     {reenviado(b) && <span class="marca">Reenviado</span>}
                   </td>
-                  <td>{autorDe(b)}</td>
+                  <td>
+                    {autorDe(b) ?? (
+                      <>
+                        <span class="sin-ficha">Sin ficha de autor</span> {b.propietario.nombre}
+                      </>
+                    )}
+                  </td>
                   <td>{b.area ?? "—"}</td>
                   <td class="col-fecha">{fechaCorta(enviado(b))}</td>
                 </tr>
@@ -84,7 +92,12 @@ const aprobados = borradores
             <li>
               <a href={`/escribir/editar/${b.id}`}>{b.titulo || "Borrador sin título"}</a>
               <span>
-                {autorDe(b)} · {fechaCorta(new Date(b.actualizado))}
+                {autorDe(b) ?? (
+                  <>
+                    <span class="sin-ficha">Sin ficha de autor: no se puede publicar</span> {b.propietario.nombre}
+                  </>
+                )}{" "}
+                · {fechaCorta(new Date(b.actualizado))}
               </span>
             </li>
           ))}
@@ -186,6 +199,17 @@ const aprobados = borradores
   .col-fecha {
     font-family: var(--font-mono);
     font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .sin-ficha {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--error);
+    border: 1px solid;
+    border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    margin-right: 4px;
     white-space: nowrap;
   }
 

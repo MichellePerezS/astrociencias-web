@@ -11,6 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { chromium } from "playwright-core";
+import { USUARIOS } from "./identidad-mock.mjs";
 
 /** PNG RGBA con un degradado, para probar que se reduce a 1600 px y se pasa a WebP. */
 function crearPng(ancho, alto) {
@@ -160,6 +161,7 @@ export async function probarFlujoRevision(base, github) {
       await E.goto("/escribir/revision");
       const fila = E.locator("table tbody tr", { hasText: TITULO });
       ok((await fila.count()) === 1, "editora: el borrador aparece en «Pendientes»");
+      ok((await fila.locator("td").nth(1).innerText()) === "Michelle Pérez", "cola: la columna Autor muestra la ficha de la autora");
       ok((await fila.locator(".marca").count()) === 0, "editora: sin marca «Reenviado» en el primer envío");
       await A.goto("/escribir/revision");
       ok(new URL(A.url()).pathname === "/escribir", "autora: /escribir/revision la redirige a /escribir");
@@ -243,6 +245,10 @@ export async function probarFlujoRevision(base, github) {
       await E.getByRole("button", { name: "Aprobar" }).click();
       await E.waitForURL("**/escribir/revision");
       ok((await E.locator("ul.lista li", { hasText: TITULO }).count()) === 1, "editora: aparece en «Aprobados»");
+      ok(
+        (await E.locator("ul.lista li", { hasText: TITULO }).innerText()).includes("Michelle Pérez"),
+        "cola: el aprobado muestra la ficha de la autora",
+      );
       ok((await E.locator("table tbody tr", { hasText: TITULO }).count()) === 0, "editora: ya no está en «Pendientes»");
 
       // Estado final para las dos.
@@ -255,26 +261,105 @@ export async function probarFlujoRevision(base, github) {
       ok(await E.locator("#ed-titulo").evaluate((e) => e.readOnly), "editora: aprobado, también en solo lectura");
       ok((await E.getByRole("button", { name: "Devolver al autor" }).count()) === 1, "editora: puede devolver un aprobado");
       ok((await A.getByRole("button", { name: "Publicar" }).count()) === 0, "autora: no ve «Publicar»");
+      // El autor es la ficha del rol de quien creó el borrador: se muestra como texto, nadie lo elige.
+      ok((await A.locator(".firma strong").innerText()) === "Michelle Pérez", "autora: ve con qué ficha se publicará");
+      ok((await E.locator(".firma strong").innerText()) === "Michelle Pérez", "editora: el editor muestra la autora (solo texto)");
 
       // 6. Publicación (fase 4): solo editores, solo desde «aprobado», y nada toca GitHub si se rechaza.
       // Ya existe un artículo con la misma dirección: debe publicarse como «-2» sin pisarlo.
       github.commitDirecto({ [`src/content/blog/${SLUG}.md`]: '---\ntitulo: "Otro artículo"\n---\n' }, "Existing article");
       const commitsAntes = github.historial().length;
       d = await datosEditor(E);
-      r = await api(A, "POST", `/api/borradores/${id}/publicar`, { version: d.version, autor: "michelle-perez" });
+      r = await api(A, "POST", `/api/borradores/${id}/publicar`, { version: d.version });
       ok(r.status() === 403, `API: la autora no puede publicar (→ ${r.status()})`);
       r = await api(E, "POST", `/api/borradores/${id}/estado`, { accion: "publicar", version: d.version });
       ok(r.status() === 400, `API: /estado no acepta «publicar» (→ ${r.status()})`);
       r = await api(E, "POST", `/api/borradores/${id}/publicar`, { version: "etag-viejo" });
       ok(r.status() === 409, `API: publicar con versión antigua da conflicto (→ ${r.status()})`);
-      r = await api(E, "POST", `/api/borradores/${id}/publicar`, { version: d.version, autor: "no-existe" });
-      ok(r.status() === 422 && (await r.json()).error === "autor", `API: publicar con una ficha que no existe (→ ${r.status()})`);
+
+      // Sin ficha válida de quien lo creó no se publica: ni desde la interfaz ni por la API.
+      /** Crea, envía y aprueba un borrador por la API; `pagina` es la sesión de quien lo crea. */
+      async function borradorAprobado(pagina, titulo) {
+        let rr = await api(pagina, "POST", "/api/borradores");
+        const { id: nuevo, version: v0 } = await rr.json();
+        rr = await api(pagina, "PUT", `/api/borradores/${nuevo}`, {
+          version: v0,
+          titulo,
+          resumen: "Resumen.",
+          area: AREA,
+          contenido: "<p>Texto.</p>",
+        });
+        rr = await api(pagina, "POST", `/api/borradores/${nuevo}/estado`, { accion: "enviar", version: (await rr.json()).version });
+        rr = await api(E, "POST", `/api/borradores/${nuevo}/estado`, { accion: "aprobar", version: (await rr.json()).version });
+        if (rr.status() !== 200) throw new Error(`no se pudo preparar «${titulo}» (${rr.status()})`);
+        return { id: nuevo, version: (await rr.json()).version };
+      }
+
+      // a) Lo creó la editora, que no tiene rol «autor:<ficha>».
+      const TITULO_SIN_FICHA = `E2E sin ficha ${MARCA}`;
+      const sinFicha = await borradorAprobado(E, TITULO_SIN_FICHA);
+      await E.goto("/escribir/revision");
+      ok(
+        (await E.locator("ul.lista li", { hasText: TITULO_SIN_FICHA }).innerText()).includes("Sin ficha de autor"),
+        "cola: un aprobado sin ficha lo indica",
+      );
+      await E.goto(`/escribir/editar/${sinFicha.id}`);
+      await E.locator(".estado-revision").waitFor();
+      ok((await E.locator(".firma").innerText()).includes("Sin ficha de autor"), "editora: el editor indica que no hay ficha");
+      await E.getByRole("button", { name: "Publicar" }).click();
+      const aviso = await E.locator(".aviso-firma").innerText();
+      ok(
+        aviso.includes("Editora E2E no tiene ficha de autor") && aviso.includes("autor:<ficha>") && aviso.includes("Netlify Identity"),
+        "diálogo: explica que un editor debe asignar el rol autor:<ficha> en Netlify Identity",
+      );
+      ok((await E.getByRole("button", { name: "Publicar ahora" }).count()) === 0, "diálogo: sin ficha no hay «Publicar ahora»");
+      ok((await E.locator(".form-devolver select").count()) === 0, "diálogo: no hay desplegable de autor");
+      r = await api(E, "POST", `/api/borradores/${sinFicha.id}/publicar`, { version: sinFicha.version, autor: "michelle-perez" });
+      ok(
+        r.status() === 422 && (await r.json()).error === "sin-ficha",
+        `API: sin ficha no se publica, aunque el navegador mande un autor (→ ${r.status()})`,
+      );
+
+      // b) Su rol apunta a una ficha que no existe.
+      const otro = await sesion("autor-ficha-mala", "token-autor-ficha-mala");
+      const fichaMala = await borradorAprobado(otro.page, `E2E ficha inexistente ${MARCA}`);
+      r = await api(E, "POST", `/api/borradores/${fichaMala.id}/publicar`, { version: fichaMala.version });
+      ok(r.status() === 422 && (await r.json()).error === "ficha-inexistente", `API: con una ficha que no existe no se publica (→ ${r.status()})`);
+      await E.goto(`/escribir/editar/${fichaMala.id}`);
+      await E.getByRole("button", { name: "Publicar" }).click();
+      ok((await E.locator(".aviso-firma").innerText()).includes("«no-existe»"), "diálogo: nombra la ficha que no existe");
+
+      // c) Si después le asignan el rol, el borrador toma la ficha cuando su creadora lo reenvía.
+      const rolesEditora = USUARIOS["token-editor"].app_metadata.roles;
+      USUARIOS["token-editor"].app_metadata.roles = ["editor", "autor:equipo-ace"];
+      try {
+        r = await api(E, "POST", `/api/borradores/${sinFicha.id}/estado`, {
+          accion: "devolver",
+          version: sinFicha.version,
+          comentario: "Reenvíalo ahora que tienes ficha.",
+        });
+        r = await api(E, "POST", `/api/borradores/${sinFicha.id}/estado`, { accion: "enviar", version: (await r.json()).version });
+        await E.goto(`/escribir/editar/${sinFicha.id}`);
+        await E.locator(".estado-revision").waitFor();
+        ok(
+          (await E.locator(".firma strong").innerText()) === "Equipo de AstroCiencias Ecuador",
+          "al reenviarlo con el rol nuevo, el borrador toma esa ficha",
+        );
+      } finally {
+        USUARIOS["token-editor"].app_metadata.roles = rolesEditora;
+      }
       ok(github.historial().length === commitsAntes, "los intentos rechazados no tocan GitHub");
 
       // Alguien empuja a main mientras se publica: debe reintentar sobre el nuevo commit, sin forzar.
+      await E.goto(ruta);
+      await E.locator(".estado-revision").waitFor();
       github.simularPushAjeno();
       await E.getByRole("button", { name: "Publicar" }).click();
-      ok((await E.locator("#publicar-autor").inputValue()) === "michelle-perez", "editora: la ficha de la autora viene elegida");
+      ok(
+        (await E.locator(".publicar-autor").innerText()) === "Se publicará firmado por Michelle Pérez.",
+        "diálogo: muestra la autora como texto",
+      );
+      ok((await E.locator(".form-devolver select").count()) === 0, "diálogo: no hay desplegable de autor");
       await Promise.all([
         E.waitForNavigation({ timeout: 30000 }),
         E.getByRole("button", { name: "Publicar ahora" }).click(),

@@ -9,7 +9,9 @@ const ESTADOS = {
   "no-permitido": 403,
   conflicto: 409,
   incompleto: 422,
-  autor: 422,
+  // Quien creó el borrador no tiene rol «autor:<ficha>», o su ficha no existe.
+  "sin-ficha": 422,
+  "ficha-inexistente": 422,
   imagen: 500,
   // Una imagen que no se puede decodificar (archivo dañado).
   "imagen-formato": 422,
@@ -22,11 +24,12 @@ const ESTADOS = {
 } as const;
 
 // Publica un borrador aprobado: lo sube a GitHub como .md con sus imágenes.
-// Cuerpo: { version, autor? } (autor: ficha de src/content/autores; si no se
-// indica, la del propietario). El middleware ya ha comprobado la sesión y el
-// origen; el rol de editor y el estado se comprueban en publicarBorrador.
+// Cuerpo: { version }. El autor no se envía: es siempre la ficha del rol
+// «autor:<ficha>» de quien creó el borrador (firmaDe en src/lib/publicar.ts).
+// El middleware ya ha comprobado la sesión y el origen; el rol de editor, el
+// estado y la ficha se comprueban en publicarBorrador.
 export const POST: APIRoute = async ({ params, request, locals }) => {
-  let cuerpo: { version?: unknown; autor?: unknown };
+  let cuerpo: { version?: unknown };
   try {
     cuerpo = await request.json();
   } catch {
@@ -34,7 +37,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
   }
   if (typeof cuerpo.version !== "string") return json({ error: "peticion" }, 400);
 
-  const r = await publicarBorrador(locals.usuario!, params.id ?? "", cuerpo.version, cuerpo.autor);
+  const r = await publicarBorrador(locals.usuario!, params.id ?? "", cuerpo.version);
   if (!r.ok) return json({ error: r.motivo, campos: r.campos }, ESTADOS[r.motivo]);
   return json({ publicacion: r.publicacion });
 };

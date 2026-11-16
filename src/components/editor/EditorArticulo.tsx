@@ -9,6 +9,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import FileHandler from "@tiptap/extension-file-handler";
 import { AREAS } from "../../content/areas";
+import type { DatosFirma } from "../../lib/firma";
 import { ETIQUETAS_ESTADO, type Accion, type EstadoBorrador } from "../../lib/flujo";
 import { MAX_BYTES_IMAGEN, TIPOS_IMAGEN } from "../../lib/imagenes";
 import { LIMITES } from "../../lib/limites";
@@ -32,10 +33,10 @@ export interface DatosIniciales {
   acciones: Accion[];
   /** Último comentario al devolverlo, si está devuelto. */
   devolucion: { comentario: string; por: string; fecha: string } | null;
-  /** Ficha de autor del propietario (preseleccionada al publicar). */
-  autor: string | null;
-  /** Fichas de autor para elegir al publicar (vacío si no puede publicar). */
-  autores: { id: string; nombre: string }[];
+  /** Nombre de quien creó el borrador (para explicar qué falta si no tiene ficha). */
+  creador: string;
+  /** Autor con el que se publica: la ficha del rol «autor:<ficha>» del creador (src/lib/firma.ts). */
+  firma: DatosFirma;
   /** Dónde quedó publicado, si lo está. */
   publicacion: { slug: string; urlCommit: string } | null;
 }
@@ -328,7 +329,7 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
   const [procesando, setProcesando] = useState(false);
   const ejecutar = async (
     accion: Accion,
-    datos: { comentario?: string; autor?: string } = {},
+    datos: { comentario?: string } = {},
   ): Promise<boolean> => {
     setProcesando(true);
     setAviso("");
@@ -348,7 +349,7 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
           ? await fetch(`/api/borradores/${id}/publicar`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ version: versionRef.current, autor: datos.autor }),
+              body: JSON.stringify({ version: versionRef.current }),
             })
           : await fetch(`/api/borradores/${id}/estado`, {
               method: "POST",
@@ -410,8 +411,8 @@ export default function EditorArticulo({ inicial }: { inicial: DatosIniciales })
         editable={editable}
         acciones={inicial.acciones}
         devolucion={inicial.devolucion}
-        autor={inicial.autor}
-        autores={inicial.autores}
+        creador={inicial.creador}
+        firma={inicial.firma}
         publicacion={inicial.publicacion}
         procesando={procesando}
         ejecutar={ejecutar}
@@ -551,6 +552,23 @@ function textoEstado(estado: Estado, ultimo: string | null): string {
   }
 }
 
+/** Por qué no se puede publicar sin ficha y qué tiene que hacer un editor. */
+function mensajeFirma(firma: DatosFirma, creador: string): string {
+  if (firma.problema === "ficha-inexistente") {
+    return (
+      `No se puede publicar: el rol de ${creador} apunta a la ficha «${firma.ficha}», que no existe en la web. ` +
+      "Un editor debe crear esa ficha en Keystatic, o corregir su rol autor:<ficha> en Netlify Identity y " +
+      "devolverle el borrador para que lo vuelva a enviar (así se guarda la ficha nueva)."
+    );
+  }
+  return (
+    `No se puede publicar: ${creador} no tiene ficha de autor. ` +
+    "Un editor debe asignarle primero el rol autor:<ficha> en Netlify Identity (Identity → su usuario → Roles), " +
+    "con el nombre de su ficha de src/content/autores. Después, devuélveselo para que lo vuelva a enviar: " +
+    "así el borrador guarda su ficha."
+  );
+}
+
 const NOMBRES_CAMPOS: Record<string, string> = {
   titulo: "título",
   resumen: "resumen",
@@ -564,7 +582,9 @@ function mensajeAccion(status: number, error: string | undefined, campos?: strin
     return `Para publicarlo falta: ${campos.map((c) => NOMBRES_CAMPOS[c] ?? c).join(", ")}. Devuélvelo al autor o complétalo antes de aprobarlo.`;
   }
   if (error === "incompleto") return "Añade un título y texto antes de enviarlo a revisión.";
-  if (error === "autor") return "Elige una ficha de autor que exista en la web.";
+  if (error === "sin-ficha" || error === "ficha-inexistente") {
+    return "No se puede publicar: quien creó el borrador no tiene una ficha de autor válida. Un editor debe asignarle el rol autor:<ficha> en Netlify Identity.";
+  }
   if (error === "imagen") return "Falta una de las imágenes del borrador. Recarga la página e inténtalo de nuevo.";
   if (error === "imagen-formato") {
     return "Una de las imágenes está dañada y no se puede preparar para la web. Quítala o súbela de nuevo.";
@@ -597,8 +617,8 @@ function PanelRevision({
   editable,
   acciones,
   devolucion,
-  autor,
-  autores,
+  creador,
+  firma,
   publicacion,
   procesando,
   ejecutar,
@@ -607,18 +627,16 @@ function PanelRevision({
   editable: boolean;
   acciones: Accion[];
   devolucion: DatosIniciales["devolucion"];
-  autor: DatosIniciales["autor"];
-  autores: DatosIniciales["autores"];
+  creador: DatosIniciales["creador"];
+  firma: DatosIniciales["firma"];
   publicacion: DatosIniciales["publicacion"];
   procesando: boolean;
-  ejecutar: (accion: Accion, datos?: { comentario?: string; autor?: string }) => Promise<boolean>;
+  ejecutar: (accion: Accion, datos?: { comentario?: string }) => Promise<boolean>;
 }) {
   const [devolviendo, setDevolviendo] = useState(false);
   const [comentario, setComentario] = useState("");
   const [publicando, setPublicando] = useState(false);
-  const [autorElegido, setAutorElegido] = useState(
-    autor && autores.some((a) => a.id === autor) ? autor : "",
-  );
+
 
   const enviar = () => {
     if (window.confirm("¿Enviar a revisión? No podrás editarlo hasta que te lo devuelvan.")) {
@@ -642,6 +660,11 @@ function PanelRevision({
         <span className={`estado-revision estado-revision-${estado}`}>{ETIQUETAS_ESTADO[estado]}</span>
       </div>
       <p>{explicacion}</p>
+      <p className={firma.problema ? "firma firma-sin-ficha" : "firma"}>
+        <span className="firma-etiqueta">Autor o autora</span>{" "}
+        {firma.nombre ? <strong>{firma.nombre}</strong> : <strong>Sin ficha de autor</strong>}
+        {firma.problema && ` (${creador})`}
+      </p>
 
       {devolucion && (
         <figure className="comentario-revision">
@@ -740,33 +763,35 @@ function PanelRevision({
       {publicando && (
         <form
           className="form-devolver"
+          aria-labelledby="publicar-titulo"
           onSubmit={(e) => {
             e.preventDefault();
-            void ejecutar("publicar", { autor: autorElegido });
+            if (!firma.problema) void ejecutar("publicar");
           }}
         >
-          <label htmlFor="publicar-autor">Autor o autora del artículo</label>
-          <select
-            id="publicar-autor"
-            required
-            value={autorElegido}
-            onChange={(e) => setAutorElegido(e.target.value)}
-          >
-            <option value="">Elige una ficha de autor</option>
-            {autores.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.nombre}
-              </option>
-            ))}
-          </select>
-          <p className="ayuda">
-            Se subirá al repositorio como artículo del blog, con sus imágenes, y Netlify lo pondrá en la web en
-            unos minutos. Después ya no se podrá editar aquí.
-          </p>
+          <h3 id="publicar-titulo">Publicar en el blog</h3>
+          {firma.problema ? (
+            <p className="aviso-firma" role="alert">
+              {mensajeFirma(firma, creador)}
+            </p>
+          ) : (
+            <>
+              <p className="publicar-autor">
+                Se publicará firmado por <strong>{firma.nombre}</strong>.
+              </p>
+              <p className="ayuda">
+                La firma es la ficha de autor de quien creó el borrador y no se puede cambiar aquí. Se subirá al
+                repositorio como artículo del blog, con sus imágenes, y Netlify lo pondrá en la web en unos
+                minutos. Después ya no se podrá editar aquí.
+              </p>
+            </>
+          )}
           <div className="acciones-revision">
-            <button type="submit" className="boton boton-principal" disabled={procesando || !autorElegido}>
-              {procesando ? "Publicando…" : "Publicar ahora"}
-            </button>
+            {!firma.problema && (
+              <button type="submit" className="boton boton-principal" disabled={procesando}>
+                {procesando ? "Publicando…" : "Publicar ahora"}
+              </button>
+            )}
             <button
               type="button"
               className="boton boton-secundario"

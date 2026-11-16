@@ -381,19 +381,38 @@
   resize: vertical;
 }
 
-.form-devolver select {
-  font: inherit;
-  color: var(--texto);
-  background: var(--cosmos);
-  border: 1px solid var(--linea-fuerte);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  max-width: 420px;
-}
-
 .form-devolver .ayuda {
   font-size: 14px;
   color: var(--texto-suave);
+}
+
+.firma {
+  font-size: 15px;
+  color: var(--texto);
+}
+
+.firma-etiqueta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--dorado);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.firma-sin-ficha strong { color: var(--error); }
+
+.form-devolver h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.aviso-firma {
+  padding: 10px 14px;
+  border-left: 3px solid var(--error);
+  background: var(--cosmos);
+  border-radius: var(--radius-sm);
+  color: var(--texto);
 }
 
 .publicacion {
@@ -407,7 +426,6 @@
   color: var(--texto-suave);
 }
 
-.form-devolver select:focus,
 .form-devolver textarea:focus {
   outline: 2px solid var(--azul);
   outline-offset: 1px;

@@ -10,8 +10,8 @@
 // Todo se comprueba aquí, en el servidor: rol de editor, estado «aprobado»,
 // versión (ETag) y campos obligatorios del esquema.
 
-import { getCollection } from "astro:content";
 import { leerBorrador, leerImagen, marcarPublicado, type Borrador, type Publicacion } from "./borradores";
+import { firmaDe } from "./firma";
 import { puedeAplicar } from "./flujo";
 import { commitArchivos, configGitHub, ErrorGitHub, shaArchivo, shaBlob, type ArchivoCommit } from "./github";
 import type { Usuario } from "./identidad";
@@ -28,7 +28,8 @@ export type ResultadoPublicacion =
         | "conflicto"
         | "no-permitido"
         | "incompleto"
-        | "autor"
+        | "sin-ficha"
+        | "ficha-inexistente"
         | "imagen"
         | "imagen-formato"
         | `github-${ErrorGitHub["motivo"]}`;
@@ -94,7 +95,6 @@ export async function publicarBorrador(
   usuario: Usuario,
   id: string,
   versionCliente: string,
-  autorCliente: unknown,
 ): Promise<ResultadoPublicacion> {
   const actual = await leerBorrador(usuario, id);
   if (!actual) return { ok: false, motivo: "no-encontrado" };
@@ -112,10 +112,10 @@ export async function publicarBorrador(
   ].filter((c): c is string => !!c);
   if (faltan.length) return { ok: false, motivo: "incompleto", campos: faltan };
 
-  // La ficha de autor debe existir: si no, la web no compilaría.
-  const autor = typeof autorCliente === "string" && autorCliente ? autorCliente : borrador.autor;
-  const fichas = new Set((await getCollection("autores")).map((a) => a.id));
-  if (!autor || !fichas.has(autor)) return { ok: false, motivo: "autor" };
+  // Firma: la ficha del creador. Sin ella (o si no existe) la web no compilaría.
+  const firma = await firmaDe(borrador);
+  if (!firma.ok) return { ok: false, motivo: firma.motivo };
+  const autor = firma.ficha;
 
   // Se optimizan antes de subirlas: máximo 1600 px de ancho y WebP (los GIF, tal cual).
   const imagenes: { archivo: string; bytes: Uint8Array }[] = [];

@@ -29,7 +29,12 @@ import { LIMITES } from "./limites";
 export interface Borrador {
   id: string;
   propietario: { id: string; nombre: string; correo: string };
-  /** Ficha de autor (src/content/autores) del propietario, si es autor. */
+  /**
+   * Ficha de autor (src/content/autores) de quien creó el borrador: su rol
+   * «autor:<ficha>». Es la firma con la que se publica (nadie la elige). Se
+   * actualiza cada vez que el propietario guarda o envía, por si le asignan
+   * el rol después de crear el borrador.
+   */
   autor: string | null;
   titulo: string;
   resumen: string;
@@ -130,12 +135,17 @@ async function etagEmulado(tienda: ReturnType<typeof tiendaBorradores>, id: stri
   return blobs.find((b) => b.key === id)?.etag || undefined;
 }
 
+/** La ficha del propietario según su rol actual, si es él quien actúa; si no, la guardada. */
+function fichaActual(usuario: Usuario, borrador: Borrador): string | null {
+  return borrador.propietario.id === usuario.id ? usuario.autor : borrador.autor;
+}
+
 export async function crearBorrador(usuario: Usuario): Promise<BorradorConVersion> {
   const ahora = new Date().toISOString();
   const borrador: Borrador = {
     id: randomUUID(),
     propietario: { id: usuario.id, nombre: usuario.nombre, correo: usuario.correo },
-    autor: usuario.rol === "autor" ? usuario.autor : null,
+    autor: usuario.autor,
     titulo: "",
     resumen: "",
     area: null,
@@ -191,6 +201,7 @@ export async function guardarBorrador(
 
   const borrador: Borrador = {
     ...actual.borrador,
+    autor: fichaActual(usuario, actual.borrador),
     titulo: textoPlano(cambios.titulo, LIMITES.titulo),
     resumen: textoPlano(cambios.resumen, LIMITES.resumen),
     area,
@@ -259,6 +270,7 @@ export async function cambiarEstado(
   };
   const borrador: Borrador = {
     ...previo,
+    autor: fichaActual(usuario, previo),
     estado: estadoTras(accion),
     historial: [...previo.historial, evento],
     actualizado: ahora,

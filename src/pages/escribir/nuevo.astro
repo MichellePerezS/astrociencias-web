@@ -1,9 +1,14 @@
 ---
 import PaginaEditor from "../../components/editor/PaginaEditor.astro";
+import { datosFirma, firmaDe } from "../../lib/firma";
 
 // El borrador se crea en el servidor con el primer cambio (no al abrir la
 // página), así no quedan borradores vacíos por visitas sin escribir nada.
 export const prerender = false;
+
+// Quien lo crea firmará el artículo con la ficha de su rol «autor:<ficha>».
+const usuario = Astro.locals.usuario!;
+const firma = await firmaDe({ autor: usuario.autor });
 ---
 
 <PaginaEditor
@@ -23,8 +28,8 @@ export const prerender = false;
     // Quien lo crea es su propietario: podrá enviarlo cuando tenga título y texto.
     acciones: ["enviar"],
     devolucion: null,
-    autor: null,
-    autores: [],
+    creador: usuario.nombre,
+    firma: datosFirma(firma),
     publicacion: null,
   }}
 />
