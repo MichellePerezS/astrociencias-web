@@ -1,0 +1,210 @@
+---
+// Portada: franja compacta «Escucha, mira y lee» con cuatro recursos.
+// Los enlaces e iconos vienen de src/content/recursos.ts (los mismos de
+// /recursos); aquí solo se eligen cuáles salen, en qué orden y con qué texto
+// corto. Sin `href`, el recurso se muestra como «Próximamente», sin enlace.
+import { RECURSOS, type Recurso } from "../content/recursos";
+
+const EN_PORTADA: { id: Recurso["id"]; nombre?: string; linea: string }[] = [
+  { id: "podcast", linea: "Episodios en Spotify" },
+  { id: "radio", linea: "Emisión en línea en Zeno.fm" },
+  { id: "charlas", nombre: "Charlas en YouTube", linea: "Directos y charlas" },
+  { id: "revista", linea: "Próximamente" },
+];
+
+const items = EN_PORTADA.map(({ id, nombre, linea }) => {
+  const r = RECURSOS.find((x) => x.id === id);
+  if (!r) throw new Error(`Recurso desconocido en la portada: ${id}`);
+  return { ...r, nombre: nombre ?? r.titulo, linea };
+});
+---
+
+<section class="contenedor franja" aria-labelledby="recursos-titulo">
+  <div class="cabecera">
+    <div class="titulos">
+      <p class="etiqueta">Recursos</p>
+      <h2 id="recursos-titulo">Escucha, mira y lee</h2>
+    </div>
+    <a href="/recursos" class="todos">
+      Ver todos los recursos<span aria-hidden="true">{" →"}</span>
+    </a>
+  </div>
+
+  <ul class="items">
+    {
+      items.map((r) => {
+        const contenido = (
+          <>
+            <svg
+              class="icono"
+              aria-hidden="true"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              set:html={r.icono}
+            />
+            <span class="texto">
+              <span class="nombre">{r.nombre}</span>
+              <span class:list={["linea", { pronto: !r.href }]}>{r.linea}</span>
+            </span>
+          </>
+        );
+        return (
+          <li>
+            {r.href ? (
+              <a class="item" href={r.href} target="_blank" rel="noopener noreferrer">
+                {contenido}
+                <span class="oculto"> (se abre en una pestaña nueva)</span>
+              </a>
+            ) : (
+              <div class="item">{contenido}</div>
+            )}
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
+
+<style>
+  .franja {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 8px 56px;
+  }
+
+  .cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .titulos p {
+    margin: 0;
+  }
+
+  /* Más pequeño que «Lo último publicado»: es una franja, no una sección. */
+  h2 {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .todos {
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 10px 0;
+  }
+
+  /* Dos por fila en móvil; los cuatro en una fila desde tableta. */
+  .items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  @media (min-width: 760px) {
+    .items {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .items > li {
+    display: flex;
+  }
+
+  .item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+    color: var(--texto);
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  a.item:hover {
+    color: var(--texto);
+    border-color: var(--dorado);
+  }
+
+  .icono {
+    flex: none;
+    color: var(--azul);
+  }
+
+  .texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .nombre {
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .linea {
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--texto-suave);
+  }
+
+  .linea.pronto {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dorado);
+  }
+
+  /* En móvil (dos por fila, poco ancho) el icono va encima del texto. */
+  @media (max-width: 480px) {
+    .item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 12px 14px;
+    }
+
+    .franja {
+      padding-bottom: 40px;
+    }
+  }
+
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+</style>

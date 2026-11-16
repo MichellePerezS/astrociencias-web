@@ -21,7 +21,7 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - Páginas de texto editables en Keystatic (grupo «Páginas»): un singleton por página, guardado en `src/content/paginas/<página>.yaml`, con su propia colección y el mismo esquema en `src/content.config.ts` (`quienesSomos`, `colabora`). En los campos de varias líneas, una línea en blanco separa párrafos. Correo y WhatsApp vienen de `src/content/contacto.ts`, compartido con el pie.
   - `/quienes-somos`: cabecera con datos destacados (solo datos reales), introducción, historia + misión + enfoque, presencia nacional (equipos con estado «Equipo activo» o «En planificación»), qué hacemos, liderazgo y coordinación (personas con foto opcional en `public/images/equipo/`; sin foto, iniciales) y llamada final con dos botones. Todo, incluidas las listas y los enlaces de los botones, se edita en Keystatic.
   - `/colabora`: tres tarjetas. Voluntariado (botón `mailto:` con asunto), colaboraciones (visitas a escuelas, colegios o universidades y otras propuestas, con botón `mailto:`) y donaciones («Próximamente», sin enlace). El botón «Colabora» de la cabecera lleva aquí.
-- `/recursos` (`src/pages/recursos.astro`): revista Astro&Ciencias (de momento «Próximamente», sin enlace), podcast (Spotify), AstroCiencias Radio (Zeno.fm), charlas en YouTube y biblioteca virtual (Google Drive). No va en la portada: el enlace «Recursos» de la cabecera lleva a esta página.
+- `/recursos` (`src/pages/recursos.astro`, lista y enlaces en `src/content/recursos.ts`, compartida con la franja de la portada): revista Astro&Ciencias (de momento «Próximamente», sin enlace), podcast (Spotify), AstroCiencias Radio (Zeno.fm), charlas en YouTube y biblioteca virtual (Google Drive). En la portada solo hay una franja pequeña con cuatro de ellos; el enlace «Recursos» de la cabecera lleva a esta página.
 - Editor propio (en construcción por fases, independiente de Keystatic): zona privada `/escribir`, acceso en `/escribir/entrar`.
   - Login con Netlify Identity, solo por invitación (`gotrue-js` en el navegador).
   - Roles en `app_metadata.roles`: `editor` (ve todo) o `autor` + `autor:<slug>` (ve los artículos de `src/content/autores/<slug>.yaml`).
@@ -61,14 +61,15 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - Sin degradados morados ni emojis. Accesible: contraste 4.5:1, enlaces y botones reales, textos alternativos.
 
 ## Portada (orden de secciones)
-Portada simplificada (de momento solo dos bloques, más el pie):
+Portada simplificada:
 1. «Destacado» (`src/components/Destacado.astro`): una tarjeta grande con imagen, título, resumen y botón. Lo decide `obtenerDestacado()` en `src/lib/destacado.ts`: el próximo evento si existe (`proximoEvento()`, que aún devuelve null porque no hay fuente de eventos) y, si no, el último artículo publicado. El componente solo recibe el tipo `Destacado`, así que para los eventos basta con implementar `proximoEvento()`.
 2. Últimos artículos del blog (`UltimosArticulos.astro`): los tres más recientes sin repetir el del destacado (prop `excluir`).
-3. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
+3. Franja compacta «Escucha, mira y lee» (`FranjaRecursos.astro`): podcast, radio, charlas en YouTube y revista («Próximamente»), con enlace a `/recursos`.
+4. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
 
 La portada no muestra un título visible: lleva un `h1` solo para lectores de pantalla.
 
-Los recursos no van en la portada: tienen su propia página, `/recursos`.
+Los recursos tienen su propia página, `/recursos`; en la portada solo va la franja compacta.
 
 ## Reglas
 - Todo el texto en español.
