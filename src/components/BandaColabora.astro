@@ -1,0 +1,65 @@
+---
+// Portada: banda final «Colabora», a todo el ancho y justo encima del pie.
+---
+
+<section class="banda" aria-labelledby="colabora-titulo">
+  <div class="contenedor fila">
+    <div class="texto">
+      <h2 id="colabora-titulo">¿Te gustaría ser parte de AstroCiencias Ecuador?</h2>
+      <p>Puedes ser voluntario, escribir artículos o apoyarnos.</p>
+    </div>
+    <a href="/colabora" class="boton boton-principal">Quiero colaborar</a>
+  </div>
+</section>
+
+<style>
+  .banda {
+    background: var(--cosmos-2);
+    border-top: 1px solid var(--linea);
+  }
+
+  /* Texto a la izquierda y botón a la derecha; en móvil, uno debajo del otro. */
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-6);
+    padding-block: 40px;
+  }
+
+  .texto {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: clamp(20px, 2.6vw, 24px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    margin: 0;
+    font-size: 17px;
+    color: var(--texto-suave);
+  }
+
+  .boton {
+    flex: none;
+  }
+
+  @media (max-width: 640px) {
+    .fila {
+      padding-block: 32px;
+    }
+
+    .boton {
+      flex: 1 1 100%;
+      text-align: center;
+    }
+  }
+</style>

@@ -1,11 +1,12 @@
 ---
 // Portada simplificada: el bloque «Destacado» (último artículo o, cuando
 // exista, el próximo evento) y debajo los últimos artículos, sin repetir el
-// destacado, y una franja compacta de recursos.
+// destacado, una franja compacta de recursos y la banda final «Colabora».
 import Base from "../layouts/Base.astro";
 import Destacado from "../components/Destacado.astro";
 import UltimosArticulos from "../components/UltimosArticulos.astro";
 import FranjaRecursos from "../components/FranjaRecursos.astro";
+import BandaColabora from "../components/BandaColabora.astro";
 import { obtenerDestacado } from "../lib/destacado";
 
 const destacado = await obtenerDestacado();
@@ -16,6 +17,7 @@ const destacado = await obtenerDestacado();
   {destacado && <Destacado destacado={destacado} />}
   <UltimosArticulos excluir={destacado?.articuloId} />
   <FranjaRecursos />
+  <BandaColabora />
 </Base>
 
 <style>
