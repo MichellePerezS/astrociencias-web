@@ -1,0 +1,98 @@
+---
+// Portada: los tres artículos publicados más recientes.
+// Nunca muestra borradores, tampoco en `astro dev` (articulosPublicados los
+// incluye en desarrollo para poder revisarlos en /blog).
+import TarjetaArticulo from "./TarjetaArticulo.astro";
+import { articulosPublicados } from "../lib/blog";
+
+const ultimos = (await articulosPublicados()).filter((a) => !a.data.borrador).slice(0, 3);
+---
+
+{
+  ultimos.length > 0 && (
+    <section id="blog" class="contenedor ultimos" aria-labelledby="ultimos-titulo">
+      <div class="cabecera">
+        <div class="titulos">
+          <p class="etiqueta">Blog</p>
+          <h2 id="ultimos-titulo">Lo último publicado</h2>
+        </div>
+        <a href="/blog" class="todos">
+          Ver todos los artículos<span aria-hidden="true"> →</span>
+        </a>
+      </div>
+
+      <div class="rejilla">
+        {ultimos.map((a) => <TarjetaArticulo articulo={a} />)}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .ultimos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block: 40px;
+  }
+
+  .cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .titulos p {
+    margin: 0;
+  }
+
+  /* Mismo tamaño que los demás títulos de sección. */
+  h2 {
+    font-weight: 600;
+    font-size: clamp(22px, 3vw, 26px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .todos {
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 10px 0;
+  }
+
+  /* Una columna en móvil y tableta; tres en escritorio (con dos, la tercera quedaría sola). */
+  .rejilla {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (min-width: 860px) {
+    .rejilla {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* En una columna, imágenes más bajas para que la sección no se alargue
+     (solo aquí: /blog usa la misma tarjeta con su altura normal). */
+  @media (max-width: 859px) {
+    .rejilla :global(.imagen) {
+      height: 140px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ultimos {
+      padding-block: 32px;
+    }
+  }
+</style>
