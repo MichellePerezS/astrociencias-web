@@ -1,0 +1,187 @@
+---
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { CORREO, WHATSAPP } from "../content/contacto";
+
+// Quiénes somos. El texto se edita en Keystatic (singleton «Quiénes somos»,
+// src/content/paginas/quienes-somos.yaml). El equipo se añadirá más adelante.
+const pagina = await getEntry("paginas", "quienes-somos");
+if (!pagina) throw new Error("Falta src/content/paginas/quienes-somos.yaml");
+const { titulo, entradilla, historia, mision, cita, queHacemos, dondeEstamos, contacto } = pagina.data;
+
+/** Párrafos de un texto de varias líneas: una línea en blanco separa párrafos. */
+const parrafos = (texto: string) =>
+  texto
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
+    .filter(Boolean);
+---
+
+<Base title="Quiénes somos" description={entradilla}>
+  <section class="contenedor encabezado">
+    <p class="etiqueta">// Quiénes somos</p>
+    <h1>{titulo}</h1>
+    <p class="entradilla">{entradilla}</p>
+  </section>
+
+  <div class="contenedor cuerpo">
+    <section aria-labelledby="t-historia">
+      <h2 id="t-historia">Historia</h2>
+      {parrafos(historia).map((p) => <p>{p}</p>)}
+    </section>
+
+    <section aria-labelledby="t-mision">
+      <h2 id="t-mision">Misión</h2>
+      {
+        cita && (
+          <blockquote class="cita">
+            <p>«{cita}»</p>
+          </blockquote>
+        )
+      }
+      {parrafos(mision).map((p) => <p>{p}</p>)}
+    </section>
+
+    <section aria-labelledby="t-hacemos">
+      <h2 id="t-hacemos">Qué hacemos</h2>
+      <ul class="actividades">
+        {queHacemos.map((a) => <li>{a}</li>)}
+      </ul>
+      <p>
+        <a href="/recursos">Revista, podcast, radio y charlas en Recursos</a>
+      </p>
+    </section>
+
+    <section aria-labelledby="t-donde">
+      <h2 id="t-donde">Dónde estamos</h2>
+      {parrafos(dondeEstamos).map((p) => <p>{p}</p>)}
+    </section>
+
+    <section aria-labelledby="t-contacto">
+      <h2 id="t-contacto">Contacto</h2>
+      {parrafos(contacto).map((p) => <p>{p}</p>)}
+      <ul class="contacto">
+        <li>
+          <span class="dato">Correo</span>
+          <a href={`mailto:${CORREO}`}>{CORREO}</a>
+        </li>
+        <li>
+          <span class="dato">WhatsApp</span>
+          <a href={WHATSAPP.href}>{WHATSAPP.texto}</a>
+        </li>
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  /* Cabecera como en /blog, /autores y /recursos. */
+  .encabezado {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: 72px var(--space-12);
+  }
+
+  h1 {
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    max-width: 760px;
+  }
+
+  .entradilla {
+    font-size: 19px;
+    color: var(--texto-suave);
+    max-width: 620px;
+  }
+
+  /* Texto en una columna de lectura cómoda. */
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    padding-bottom: var(--space-24);
+  }
+
+  .cuerpo section {
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: clamp(22px, 3vw, 26px);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--linea);
+  }
+
+  .cuerpo p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--texto);
+  }
+
+  .cita {
+    margin: 0;
+    padding: var(--space-6);
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+  }
+
+  .cuerpo .cita p {
+    font-family: var(--font-titulos);
+    font-size: clamp(19px, 2.4vw, 22px);
+    line-height: 1.4;
+    color: var(--dorado);
+  }
+
+  .actividades {
+    margin: 0;
+    padding-left: 1.2em;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .actividades li::marker {
+    color: var(--azul);
+  }
+
+  .contacto {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .contacto li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    min-height: 44px;
+    font-size: 17px;
+  }
+
+  .dato {
+    min-width: 84px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dorado);
+  }
+
+  .contacto a {
+    overflow-wrap: anywhere;
+  }
+</style>

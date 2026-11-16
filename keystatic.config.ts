@@ -1,4 +1,4 @@
-import { config, collection, fields } from "@keystatic/core";
+import { config, collection, fields, singleton } from "@keystatic/core";
 import { AREAS } from "./src/content/areas";
 
 // Proyecto de Keystatic Cloud con el formato «equipo/proyecto».
@@ -12,7 +12,7 @@ export default config({
 
   ui: {
     brand: { name: "AstroCiencias Ecuador" },
-    navigation: { Contenido: ["blog", "autores"] },
+    navigation: { Contenido: ["blog", "autores"], Páginas: ["quienesSomos"] },
   },
 
   collections: {
@@ -104,6 +104,57 @@ export default config({
           publicPath: "/images/autores/",
         }),
         enlace: fields.url({ label: "Web o red social (opcional)" }),
+      },
+    }),
+  },
+
+  // Páginas de texto. Su esquema está en src/content.config.ts (colección «paginas»).
+  singletons: {
+    quienesSomos: singleton({
+      label: "Quiénes somos",
+      path: "src/content/paginas/quienes-somos",
+      format: { data: "yaml" },
+      schema: {
+        titulo: fields.text({ label: "Título", validation: { isRequired: true } }),
+        entradilla: fields.text({
+          label: "Entradilla",
+          description: "Una o dos frases bajo el título.",
+          multiline: true,
+          validation: { isRequired: true },
+        }),
+        historia: fields.text({
+          label: "Historia",
+          description: "Deja una línea en blanco entre párrafos.",
+          multiline: true,
+          validation: { isRequired: true },
+        }),
+        mision: fields.text({
+          label: "Misión",
+          description: "Deja una línea en blanco entre párrafos.",
+          multiline: true,
+          validation: { isRequired: true },
+        }),
+        cita: fields.text({
+          label: "Cita destacada",
+          description: "Frase que se muestra resaltada junto a la misión (opcional).",
+          multiline: true,
+        }),
+        queHacemos: fields.array(
+          fields.text({ label: "Actividad", validation: { isRequired: true } }),
+          { label: "Qué hacemos", itemLabel: (props) => props.value },
+        ),
+        dondeEstamos: fields.text({
+          label: "Dónde estamos",
+          description: "Deja una línea en blanco entre párrafos.",
+          multiline: true,
+          validation: { isRequired: true },
+        }),
+        contacto: fields.text({
+          label: "Contacto (texto)",
+          description: "El correo y el WhatsApp se muestran debajo; se cambian en src/content/contacto.ts.",
+          multiline: true,
+          validation: { isRequired: true },
+        }),
       },
     }),
   },

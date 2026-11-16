@@ -36,4 +36,22 @@ const autores = defineCollection({
   }),
 });
 
-export const collections = { blog, autores };
+// Páginas de texto editables en Keystatic como singletons (un .yaml por página).
+// Los párrafos van en campos de texto de varias líneas: una línea en blanco
+// separa párrafos.
+const paginas = defineCollection({
+  loader: glob({ pattern: "*.yaml", base: "./src/content/paginas" }),
+  schema: z.object({
+    // Quiénes somos (src/content/paginas/quienes-somos.yaml).
+    titulo: z.string(),
+    entradilla: z.string(),
+    historia: z.string(),
+    mision: z.string(),
+    cita: z.string().nullish(),
+    queHacemos: z.array(z.string()),
+    dondeEstamos: z.string(),
+    contacto: z.string(),
+  }),
+});
+
+export const collections = { blog, autores, paginas };

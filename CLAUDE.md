@@ -17,7 +17,8 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - `src/content/blog/`: un `.md` por artículo; esquema en `src/content.config.ts`.
 - `src/content/autores/`: un `.yaml` por autor; los artículos lo citan en `autor` por su nombre de archivo.
 - `src/content/areas.ts`: lista única de áreas, compartida por el esquema, Keystatic y los formularios.
-- Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/recursos`, `/colabora/escribe` (y su `/gracias`).
+- Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/quienes-somos`, `/recursos`, `/colabora/escribe` (y su `/gracias`).
+- `/quienes-somos`: su texto se edita en Keystatic (singleton «Quiénes somos», en «Páginas») y se guarda en `src/content/paginas/quienes-somos.yaml` (colección `paginas` de `src/content.config.ts`). En los campos de varias líneas, una línea en blanco separa párrafos. Correo y WhatsApp vienen de `src/content/contacto.ts`, compartido con el pie. La sección del equipo queda para más adelante.
 - `/recursos` (`src/pages/recursos.astro`): revista Astro&Ciencias (de momento «Próximamente», sin enlace), podcast (Spotify), AstroCiencias Radio (Zeno.fm), charlas en YouTube y biblioteca virtual (Google Drive). No va en la portada: el enlace «Recursos» de la cabecera lleva a esta página.
 - Editor propio (en construcción por fases, independiente de Keystatic): zona privada `/escribir`, acceso en `/escribir/entrar`.
   - Login con Netlify Identity, solo por invitación (`gotrue-js` en el navegador).
