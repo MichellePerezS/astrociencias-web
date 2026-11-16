@@ -17,7 +17,8 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - `src/content/blog/`: un `.md` por artículo; esquema en `src/content.config.ts`.
 - `src/content/autores/`: un `.yaml` por autor; los artículos lo citan en `autor` por su nombre de archivo.
 - `src/content/areas.ts`: lista única de áreas, compartida por el esquema, Keystatic y los formularios.
-- Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/colabora/escribe` (y su `/gracias`).
+- Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/recursos`, `/colabora/escribe` (y su `/gracias`).
+- `/recursos` (`src/pages/recursos.astro`): revista Astro&Ciencias (de momento «Próximamente», sin enlace), podcast (Spotify), AstroCiencias Radio (Zeno.fm), charlas en YouTube y biblioteca virtual (Google Drive). No va en la portada: el enlace «Recursos» de la cabecera lleva a esta página.
 - Editor propio (en construcción por fases, independiente de Keystatic): zona privada `/escribir`, acceso en `/escribir/entrar`.
   - Login con Netlify Identity, solo por invitación (`gotrue-js` en el navegador).
   - Roles en `app_metadata.roles`: `editor` (ve todo) o `autor` + `autor:<slug>` (ve los artículos de `src/content/autores/<slug>.yaml`).
@@ -61,9 +62,10 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 2. Barra de próximo evento.
 3. Áreas: Astronomía y astrofísica, Física y química, Biología y salud, Ciencias de la Tierra, Tecnología e IA, Mujer y niña en la ciencia.
 4. Últimos artículos del blog (desde la colección).
-5. Recursos: revista Astro&Ciencias, podcast (Spotify), AstroCiencias Radio, charlas en YouTube, biblioteca virtual.
-6. Colabora: voluntariado y donaciones.
-7. Pie con redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
+5. Colabora: voluntariado y donaciones.
+6. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
+
+Los recursos no van en la portada: tienen su propia página, `/recursos`.
 
 ## Reglas
 - Todo el texto en español.
