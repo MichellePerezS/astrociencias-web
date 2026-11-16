@@ -36,6 +36,22 @@ const autores = defineCollection({
   }),
 });
 
+// Revista Astro&Ciencias: un .md por número (igual que en keystatic.config.ts).
+// El texto describe qué trae el número; el PDF está fuera del repositorio
+// (`enlace`, Google Drive o la web de la revista).
+const revista = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/revista" }),
+  schema: z.object({
+    numero: z.number().int().positive(),
+    titulo: z.string(),
+    periodo: z.string(),
+    fecha: z.coerce.date(),
+    portada: z.string(),
+    portadaAlt: z.string().nullish(),
+    enlace: z.string().url(),
+  }),
+});
+
 // Páginas de texto editables en Keystatic como singletons: un .yaml por página
 // en src/content/paginas y una colección por página (cada una con su esquema,
 // igual que su singleton en keystatic.config.ts). Los párrafos van en campos de
@@ -115,4 +131,4 @@ const colabora = defineCollection({
   }),
 });
 
-export const collections = { blog, autores, quienesSomos, colabora };
+export const collections = { blog, autores, revista, quienesSomos, colabora };

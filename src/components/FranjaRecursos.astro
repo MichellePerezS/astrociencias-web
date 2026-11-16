@@ -3,7 +3,10 @@
 // Los enlaces e iconos vienen de src/content/recursos.ts (los mismos de
 // /recursos); aquí solo se eligen cuáles salen, en qué orden y con qué texto
 // corto. Sin `href`, el recurso se muestra como «Próximamente», sin enlace.
+// La revista, si ya hay números (colección `revista`), muestra la portada del
+// último y enlaza a su página.
 import { RECURSOS, type Recurso } from "../content/recursos";
+import { ediciones, numeroEdicion, urlEdicion } from "../lib/revista";
 
 const EN_PORTADA: { id: Recurso["id"]; nombre?: string; linea: string }[] = [
   { id: "podcast", linea: "Episodios en Spotify" },
@@ -12,10 +15,22 @@ const EN_PORTADA: { id: Recurso["id"]; nombre?: string; linea: string }[] = [
   { id: "revista", linea: "Próximamente" },
 ];
 
+const [ultimaEdicion] = await ediciones();
+
 const items = EN_PORTADA.map(({ id, nombre, linea }) => {
   const r = RECURSOS.find((x) => x.id === id);
   if (!r) throw new Error(`Recurso desconocido en la portada: ${id}`);
-  return { ...r, nombre: nombre ?? r.titulo, linea };
+  const item = { ...r, nombre: nombre ?? r.titulo, linea, portada: null as string | null, interno: false };
+  if (id === "revista" && ultimaEdicion) {
+    return {
+      ...item,
+      href: urlEdicion(ultimaEdicion),
+      linea: `${numeroEdicion(ultimaEdicion)} · ${ultimaEdicion.data.periodo}`,
+      portada: ultimaEdicion.data.portada,
+      interno: true,
+    };
+  }
+  return item;
 });
 ---
 
@@ -35,6 +50,9 @@ const items = EN_PORTADA.map(({ id, nombre, linea }) => {
       items.map((r) => {
         const contenido = (
           <>
+            {r.portada ? (
+              <img class="miniatura" src={r.portada} alt="" width="30" height="42" />
+            ) : (
             <svg
               class="icono"
               aria-hidden="true"
@@ -48,6 +66,7 @@ const items = EN_PORTADA.map(({ id, nombre, linea }) => {
               stroke-linejoin="round"
               set:html={r.icono}
             />
+            )}
             <span class="texto">
               <span class="nombre">{r.nombre}</span>
               <span class:list={["linea", { pronto: !r.href }]}>{r.linea}</span>
@@ -56,7 +75,11 @@ const items = EN_PORTADA.map(({ id, nombre, linea }) => {
         );
         return (
           <li>
-            {r.href ? (
+            {r.href && r.interno ? (
+              <a class="item" href={r.href}>
+                {contenido}
+              </a>
+            ) : r.href ? (
               <a class="item" href={r.href} target="_blank" rel="noopener noreferrer">
                 {contenido}
                 <span class="oculto"> (se abre en una pestaña nueva)</span>
@@ -154,6 +177,17 @@ const items = EN_PORTADA.map(({ id, nombre, linea }) => {
   .icono {
     flex: none;
     color: var(--azul);
+  }
+
+  /* Portada del último número, en lugar del icono (proporción A4). */
+  .miniatura {
+    flex: none;
+    width: 30px;
+    height: 42px;
+    object-fit: cover;
+    border: 1px solid var(--linea-fuerte);
+    border-radius: 3px;
+    background: var(--cosmos-3);
   }
 
   .texto {

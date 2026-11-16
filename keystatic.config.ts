@@ -37,7 +37,7 @@ export default config({
 
   ui: {
     brand: { name: "AstroCiencias Ecuador" },
-    navigation: { Contenido: ["blog", "autores"], Páginas: ["quienesSomos", "colabora"] },
+    navigation: { Contenido: ["blog", "autores", "revista"], Páginas: ["quienesSomos", "colabora"] },
   },
 
   collections: {
@@ -129,6 +129,65 @@ export default config({
           publicPath: "/images/autores/",
         }),
         enlace: fields.url({ label: "Web o red social (opcional)" }),
+      },
+    }),
+
+    // Revista Astro&Ciencias: una entrada por número. El PDF no se sube al
+    // repositorio: el enlace apunta a Google Drive o a la web de la revista.
+    // Esquema igual que la colección `revista` de src/content.config.ts.
+    revista: collection({
+      label: "Revista Astro&Ciencias",
+      slugField: "titulo",
+      path: "src/content/revista/*",
+      format: { contentField: "contenido" },
+      entryLayout: "content",
+      columns: ["numero", "titulo", "periodo"],
+      previewUrl: "/recursos/revista/{slug}",
+      schema: {
+        numero: fields.integer({
+          label: "Número",
+          description: "Número de la edición, p. ej. 12.",
+          validation: { isRequired: true, min: 1 },
+        }),
+        titulo: fields.slug({
+          name: { label: "Título" },
+          slug: {
+            label: "Dirección (URL)",
+            description: "Se genera a partir del título. No la cambies una vez publicada.",
+          },
+        }),
+        periodo: fields.text({
+          label: "Periodo",
+          description: "Por ejemplo, «Abril – Junio 2026».",
+          validation: { isRequired: true },
+        }),
+        fecha: fields.date({
+          label: "Fecha de publicación",
+          description: "Ordena las ediciones: la más reciente es la «Edición vigente».",
+          defaultValue: { kind: "today" },
+          validation: { isRequired: true },
+        }),
+        portada: fields.image({
+          label: "Portada",
+          directory: "public/images/revista",
+          publicPath: "/images/revista/",
+          validation: { isRequired: true },
+        }),
+        portadaAlt: fields.text({
+          label: "Texto alternativo de la portada",
+          description: "Describe la portada para quien no puede verla.",
+        }),
+        enlace: fields.url({
+          label: "Enlace a la revista",
+          description: "URL del PDF en Google Drive o de la web de la revista. No subas el PDF aquí.",
+          validation: { isRequired: true },
+        }),
+        contenido: fields.markdoc({
+          label: "Qué trae este número",
+          description: "El primer párrafo se usa como extracto en las tarjetas.",
+          extension: "md",
+          options: { heading: [2, 3], image: false, table: false },
+        }),
       },
     }),
   },

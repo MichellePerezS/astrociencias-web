@@ -3,7 +3,19 @@ import Base from "../layouts/Base.astro";
 
 // Lista de recursos en src/content/recursos.ts (compartida con la portada).
 // Los enlaces externos se abren en una pestaña nueva.
-import { RECURSOS as recursos } from "../content/recursos";
+// La revista tiene además su sección con los números publicados (colección
+// `revista`, editable en Keystatic); si aún no hay ninguno, su tarjeta sigue
+// como «Próximamente» y la sección no se muestra.
+import { RECURSOS } from "../content/recursos";
+import { ediciones, extracto, numeroEdicion, urlEdicion } from "../lib/revista";
+
+const numeros = await ediciones();
+
+const recursos = RECURSOS.map((r) =>
+  r.id === "revista" && numeros.length > 0
+    ? { ...r, href: "#revista", accion: "Ver los números", interno: true }
+    : { ...r, interno: false },
+);
 ---
 
 <Base
@@ -40,15 +52,20 @@ import { RECURSOS as recursos } from "../content/recursos";
           return (
             <li>
               {r.href ? (
-                <a class="tarjeta" href={r.href} target="_blank" rel="noopener noreferrer">
+                <a
+                  class="tarjeta"
+                  href={r.href}
+                  target={r.interno ? undefined : "_blank"}
+                  rel={r.interno ? undefined : "noopener noreferrer"}
+                >
                   {icono}
                   <h2 class="titulo">{r.titulo}</h2>
                   <p class="texto">{r.texto}</p>
                   <span class="accion">
                     {r.accion}
                     {/* Espacio duro: la flecha no se queda sola en otra línea. */}
-                    <span aria-hidden="true">{" ↗"}</span>
-                    <span class="oculto"> (se abre en una pestaña nueva)</span>
+                    <span aria-hidden="true">{r.interno ? "\u00a0↓" : "\u00a0↗"}</span>
+                    {!r.interno && <span class="oculto"> (se abre en una pestaña nueva)</span>}
                   </span>
                 </a>
               ) : (
@@ -65,6 +82,41 @@ import { RECURSOS as recursos } from "../content/recursos";
       }
     </ul>
   </section>
+
+  {
+    numeros.length > 0 && (
+      <section id="revista" class="contenedor revista" aria-labelledby="revista-titulo">
+        <div class="titulos">
+          <p class="etiqueta">// Revista</p>
+          <h2 id="revista-titulo">Revista Astro&Ciencias</h2>
+          <p class="texto-seccion">Nuestra revista trimestral de divulgación científica.</p>
+        </div>
+
+        <ul class="numeros">
+          {numeros.map((n, i) => (
+            <li>
+              <a class="numero" href={urlEdicion(n)}>
+                <div class="portada">
+                  <img src={n.data.portada} alt="" loading={i < 4 ? "eager" : "lazy"} />
+                  <span class:list={["insignia", "sobre-portada", { vigente: i === 0 }]}>
+                    {i === 0 ? `Edición vigente · ${numeroEdicion(n)}` : numeroEdicion(n)}
+                  </span>
+                </div>
+                <div class="cuerpo">
+                  <span class:list={["insignia", "en-texto", { vigente: i === 0 }]}>
+                    {i === 0 ? `Edición vigente · ${numeroEdicion(n)}` : numeroEdicion(n)}
+                  </span>
+                  <span class="periodo">{n.data.periodo}</span>
+                  <h3>{n.data.titulo}</h3>
+                  {extracto(n.body) && <p class="extracto">{extracto(n.body)}</p>}
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 </Base>
 
 <style>
@@ -91,6 +143,184 @@ import { RECURSOS as recursos } from "../content/recursos";
 
   .lista {
     padding-bottom: var(--space-24);
+  }
+
+  /* Si sigue la sección de la revista, menos espacio entre las dos. */
+  .lista:has(+ .revista) {
+    padding-bottom: var(--space-12);
+  }
+
+  /* ---- Revista Astro&Ciencias: rejilla de portadas ---- */
+  .revista {
+    scroll-margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-bottom: var(--space-24);
+  }
+
+  .titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .titulos p {
+    margin: 0;
+  }
+
+  .titulos h2 {
+    font-weight: 600;
+    font-size: clamp(24px, 3vw, 30px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .texto-seccion {
+    color: var(--texto-suave);
+    font-size: 17px;
+  }
+
+  /* Móvil: tarjetas horizontales (portada pequeña a la izquierda).
+     Desde 560 px: portada arriba, en 2, 3 o 4 columnas. */
+  .numeros {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 560px) {
+    .numeros {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .numeros {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1150px) {
+    .numeros {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .numeros > li {
+    display: flex;
+  }
+
+  .numero {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    background: var(--cosmos-2);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    color: var(--texto);
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+
+  @media (min-width: 560px) {
+    .numero {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+  }
+
+  .numero:hover {
+    color: var(--texto);
+    border-color: var(--dorado);
+  }
+
+  /* Proporción A4, la de la revista. */
+  .portada {
+    position: relative;
+    aspect-ratio: 210 / 297;
+    background: var(--cosmos-3);
+  }
+
+  .portada img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .insignia {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texto);
+    background: rgb(6 20 35 / 0.85);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radius-sm);
+    padding: 3px 7px;
+  }
+
+  .insignia.vigente {
+    color: var(--cosmos);
+    background: var(--dorado);
+    border-color: var(--dorado);
+  }
+
+  /* La insignia va sobre la portada; en la tarjeta horizontal de móvil la
+     portada es demasiado estrecha y la insignia pasa al texto. */
+  .sobre-portada {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+
+  .en-texto {
+    display: none;
+  }
+
+  @media (max-width: 559px) {
+    .sobre-portada {
+      display: none;
+    }
+
+    .en-texto {
+      display: inline-block;
+    }
+  }
+
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 18px 20px;
+  }
+
+  .periodo {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dorado);
+  }
+
+  .cuerpo h3 {
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+  }
+
+  .extracto {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--texto-suave);
   }
 
   .tarjetas {

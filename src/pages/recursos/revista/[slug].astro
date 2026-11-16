@@ -1,0 +1,249 @@
+---
+// Página de un número de la revista Astro&Ciencias: portada, título, periodo,
+// qué trae el número y botón «Leer la revista» (el PDF está fuera del
+// repositorio, en Google Drive o en la web de la revista).
+// Se edita en Keystatic (colección «Revista Astro&Ciencias»): src/content/revista/.
+import { render } from "astro:content";
+import Base from "../../../layouts/Base.astro";
+import { fechaLarga } from "../../../lib/blog";
+import { ediciones, extracto, numeroEdicion, type Edicion } from "../../../lib/revista";
+
+export async function getStaticPaths() {
+  const todas = await ediciones();
+  return todas.map((edicion, i) => ({
+    params: { slug: edicion.id },
+    props: { edicion, vigente: i === 0 },
+  }));
+}
+
+interface Props {
+  edicion: Edicion;
+  vigente: boolean;
+}
+
+const { edicion, vigente } = Astro.props;
+const { titulo, periodo, fecha, portada, portadaAlt, enlace } = edicion.data;
+const { Content } = await render(edicion);
+const numero = numeroEdicion(edicion);
+---
+
+<Base
+  title={`${titulo} · Revista Astro&Ciencias ${numero}`}
+  description={extracto(edicion.body, 160) || `Revista Astro&Ciencias ${numero}, ${periodo}.`}
+>
+  <article class="contenedor edicion">
+    <a href="/recursos#revista" class="volver">← Volver a recursos</a>
+
+    <div class="fila">
+      <div class="portada">
+        <img src={portada} alt={portadaAlt || `Portada de la revista Astro&Ciencias ${numero}`} />
+      </div>
+
+      <div class="texto">
+        <header class="cabecera">
+          <p class="etiqueta">// Revista Astro&Ciencias</p>
+          <p class="meta">
+            <span class:list={["numero", { vigente }]}>{vigente ? `Edición vigente · ${numero}` : numero}</span>
+            <span>{periodo}</span>
+          </p>
+          <h1>{titulo}</h1>
+          <p class="fecha">
+            Publicada el <time datetime={fecha.toISOString().slice(0, 10)}>{fechaLarga(fecha)}</time>
+          </p>
+          <div>
+            <a href={enlace} class="boton boton-principal" target="_blank" rel="noopener noreferrer">
+              Leer la revista<span aria-hidden="true">{" ↗"}</span>
+              <span class="oculto"> (se abre en una pestaña nueva)</span>
+            </a>
+          </div>
+        </header>
+
+        <div class="prosa">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .edicion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block: 48px var(--space-24);
+  }
+
+  .volver {
+    align-self: flex-start;
+    font-family: var(--font-titulos);
+    font-weight: 500;
+    font-size: 15px;
+    padding: 6px 0;
+  }
+
+  /* Portada a la izquierda en escritorio; arriba (y más estrecha) en móvil. */
+  .fila {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6) var(--space-12);
+    align-items: start;
+  }
+
+  @media (min-width: 820px) {
+    .fila {
+      grid-template-columns: minmax(260px, 4fr) 7fr;
+    }
+
+    .portada {
+      position: sticky;
+      top: 24px;
+    }
+  }
+
+  .portada {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  @media (max-width: 819px) {
+    .portada {
+      max-width: 300px;
+    }
+  }
+
+  .portada img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+    background: var(--cosmos-3);
+  }
+
+  .texto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-width: 0;
+  }
+
+  .cabecera {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .cabecera p {
+    margin: 0;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .numero {
+    color: var(--dorado);
+  }
+
+  .numero.vigente {
+    color: var(--cosmos);
+    background: var(--dorado);
+    border-radius: var(--radius-sm);
+    padding: 3px 8px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 4.5vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    overflow-wrap: break-word;
+  }
+
+  .fecha {
+    font-size: 15px;
+    color: var(--texto-tenue);
+  }
+
+  @media (max-width: 640px) {
+    .cabecera .boton {
+      display: block;
+      text-align: center;
+    }
+  }
+
+  /* Texto de Keystatic: qué trae este número. */
+  .prosa {
+    border-top: 1px solid var(--linea);
+    padding-top: var(--space-6);
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--texto-suave);
+    max-width: 680px;
+  }
+
+  .prosa > :global(* + *) {
+    margin-top: 1em;
+  }
+
+  .prosa :global(h2),
+  .prosa :global(h3) {
+    color: var(--texto);
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 1.6em;
+  }
+
+  .prosa :global(h2) {
+    font-size: 24px;
+  }
+
+  .prosa :global(h3) {
+    font-size: 20px;
+  }
+
+  .prosa :global(strong) {
+    color: var(--texto);
+  }
+
+  .prosa :global(ul),
+  .prosa :global(ol) {
+    padding-left: 1.3em;
+  }
+
+  .prosa :global(li + li) {
+    margin-top: 0.4em;
+  }
+
+  .prosa :global(li::marker) {
+    color: var(--azul);
+  }
+
+  .prosa :global(blockquote) {
+    margin-inline: 0;
+    padding-left: 1em;
+    border-left: 3px solid var(--dorado);
+    color: var(--texto);
+  }
+
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

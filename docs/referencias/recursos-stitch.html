@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Source+Sans+3:wght@400;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed-dim":"#ffb868","on-secondary-fixed":"#221b07","surface-container-high":"#1e2b3b","primary-fixed-dim":"#7fd0fe","surface-tint":"#7fd0fe","on-primary-fixed":"#001e2c","on-tertiary":"#482900","on-primary-fixed-variant":"#004c69","on-surface-variant":"#bfc8cf","on-background":"#d6e4f9","tertiary-fixed":"#ffddbb","on-primary-container":"#00364c","on-secondary":"#37301a","inverse-on-surface":"#243142","inverse-surface":"#d6e4f9","on-secondary-container":"#c4b799","error-container":"#93000a","surface-container-low":"#0f1c2c","on-tertiary-fixed-variant":"#673d00","surface-container":"#132030","secondary-fixed-dim":"#d3c5a7","background":"#061423","primary":"#7fd0fe","on-error-container":"#ffdad6","surface-container-lowest":"#020f1e","tertiary-container":"#cf8c3b","surface-variant":"#293646","inverse-primary":"#00658b","on-error":"#690005","surface-dim":"#061423","on-surface":"#d6e4f9","error":"#ffb4ab","secondary":"#d3c5a7","on-tertiary-container":"#4b2b00","primary-fixed":"#c4e7ff","tertiary":"#ffb868","secondary-container":"#514831","surface-bright":"#2d3a4b","on-tertiary-fixed":"#2b1700","primary-container":"#4fa3cf","on-primary":"#00344a","on-secondary-fixed-variant":"#4f462f","outline":"#899299","surface":"#061423","secondary-fixed":"#f0e1c1","outline-variant":"#3f484e","surface-container-highest":"#293646"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-md":"1rem","margin":"2rem","space-xs":"0.25rem","space-sm":"0.5rem","space-xl":"2.5rem","gutter-sm":"0.75rem","gutter":"1.5rem","margin-sm":"1rem","space-lg":"1.5rem"},fontFamily:{"headline-lg":["Space Grotesk"],"telemetry-lg":["JetBrains Mono"],"display-hero-mobile":["Space Grotesk"],"telemetry-sm":["JetBrains Mono"],"headline-md":["Space Grotesk"],"body-md":["\"Source Sans 3\""],"body-sm":["\"Source Sans 3\""],"telemetry-md":["JetBrains Mono"],"display-hero":["Space Grotesk"],"headline-sm":["Space Grotesk"],"headline-lg-mobile":["Space Grotesk"],"body-lg":["\"Source Sans 3\""],"font-body":["\"Source Sans 3\""],"font-headline":["Space Grotesk"]},fontSize:{"headline-lg":["36px",{lineHeight:"44px",letterSpacing:"-0.015em",fontWeight:"600"}],"telemetry-lg":["16px",{lineHeight:"24px",letterSpacing:"0.02em",fontWeight:"500"}],"display-hero-mobile":["36px",{lineHeight:"44px",letterSpacing:"-0.01em",fontWeight:"700"}],"telemetry-sm":["11px",{lineHeight:"16px",letterSpacing:"0.06em",fontWeight:"400"}],"headline-md":["24px",{lineHeight:"32px",letterSpacing:"0em",fontWeight:"600"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"telemetry-md":["13px",{lineHeight:"18px",letterSpacing:"0.04em",fontWeight:"500"}],"display-hero":["56px",{lineHeight:"64px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["20px",{lineHeight:"28px",letterSpacing:"0em",fontWeight:"500"}],"headline-lg-mobile":["28px",{lineHeight:"36px",letterSpacing:"-0.01em",fontWeight:"600"}],"body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface min-h-screen"><header class="fixed top-0 left-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-20 w-full px-margin flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="AstroCiencias Ecuador Logo" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1U7CSqgi7crmhw-U7Y86PGNeff-1xp0SitpH0eqNfADNqCMkJwcO_W1GiQGEWZsPZwfMQZuy0OjcnV_tG8x3UUewLe7LP1oY-B4eMcJpR5Jjov334LBXyaNYFzpHRpZR9OLrKQBaHbo7BuoZCfxCROAnGBWXX8pdXe3NUCRyztVyOzj13WDDgxmHdrZaj6xuaDduLtIJOvnoOyymsm3QU-Zxaborzd7QAObr5P8ytYn64xvfZiHPy3L0g"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">AstroCiencias</span><span class="font-telemetry-sm text-telemetry-sm text-primary uppercase tracking-widest leading-tight">Ecuador · Lat 0°</span></div></div><nav class="hidden lg:flex items-center gap-space-lg" data-active-classes="text-primary font-headline-sm font-semibold"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="inicio" href="#">Inicio</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="quienes-somos" href="#">Quiénes somos</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="blog" href="#">Blog</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="eventos" href="#">Eventos</a><a aria-current="page" class="transition-colors py-space-xs text-primary font-headline-sm font-semibold" data-path="recursos" href="#">Recursos</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="colabora" href="#">Colabora</a></nav><div class="flex items-center gap-space-md"><a class="px-space-md py-space-sm bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-headline-sm text-headline-sm text-sm rounded-lg transition-all shadow-[0_0_12px_rgba(79,163,207,0.2)] hover:shadow-[0_0_16px_rgba(79,163,207,0.4)]" data-path="participar" href="#">Participar</a></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full">
+<!-- SECTION 1: CONSOLE HEADER & REALTIME FILTER CONTROLLER -->
+<section class="relative w-full px-margin pt-space-xl pb-space-lg overflow-hidden">
+<div class="absolute inset-0 pointer-events-none opacity-20">
+<div class="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-primary/15 blur-3xl"></div>
+<div class="absolute top-1/2 left-10 w-80 h-80 rounded-full bg-secondary/10 blur-3xl"></div>
+</div>
+<div class="relative z-10 flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-sm pb-space-xs">
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-primary tracking-widest uppercase">
+<span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>REP-ARC // LATITUD 0°0'00" · QUITO, ECUADOR</span>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface-variant">ACCESO PÚBLICO LIBRE</span>
+</div>
+<div class="font-telemetry-sm text-telemetry-sm text-secondary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span id="astronomic-clock">UTC-5 · 2025.Q2 REPOSITORIO ACTIVO</span>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+<div class="max-w-3xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Recursos Abiertos &amp; Multimedia
+          </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-space-xs max-w-2xl">
+            Herramientas cartográficas ecuatoriales, ediciones periódicas, fonoteca astrofísica y datos científicos abiertos desarrollados para la divulgación y educación en la mitad del mundo.
+          </p>
+</div>
+<!-- Metric pill counters -->
+<div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-xl">
+<div class="flex flex-col px-space-xs">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">DOCUMENTOS</span>
+<span class="font-headline-md text-headline-md text-primary">48+</span>
+</div>
+<div class="w-px h-8 bg-surface-variant"></div>
+<div class="flex flex-col px-space-xs">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">EPISODIOS</span>
+<span class="font-headline-md text-headline-md text-secondary">26</span>
+</div>
+<div class="w-px h-8 bg-surface-variant"></div>
+<div class="flex flex-col px-space-xs">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">LICENCIA</span>
+<span class="font-telemetry-md text-telemetry-md text-on-surface">CC-BY-4.0</span>
+</div>
+</div>
+</div>
+<!-- Live Search & Filtering Strip -->
+<div class="mt-space-md grid grid-cols-1 lg:grid-cols-12 gap-space-md items-center bg-surface-container p-space-md rounded-xl">
+<div class="lg:col-span-5 relative flex items-center">
+<span class="material-symbols-outlined text-primary absolute left-space-md pointer-events-none">search</span>
+<input class="w-full bg-surface-container-lowest text-on-surface pl-12 pr-space-md py-space-sm font-body-md text-body-md rounded-lg focus:outline-none focus:ring-1 focus:ring-primary placeholder-outline" id="resource-search" placeholder="Buscar por objeto celeste, tema, autor o tag técnico..." type="text"/>
+<span class="hidden sm:inline-block absolute right-space-md font-telemetry-sm text-telemetry-sm text-outline-variant">⌘K</span>
+</div>
+<div class="lg:col-span-7 flex flex-wrap items-center gap-space-xs justify-start lg:justify-end">
+<button class="filter-chip px-space-md py-space-xs bg-primary text-on-primary font-telemetry-sm text-telemetry-sm rounded-lg transition-all" data-filter="all">
+            TODOS LOS MEDIOS
+          </button>
+<button class="filter-chip px-space-md py-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm rounded-lg transition-all" data-filter="magazines">
+            REVISTAS PDF
+          </button>
+<button class="filter-chip px-space-md py-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm rounded-lg transition-all" data-filter="audio">
+            PODCAST CÓSMICO
+          </button>
+<button class="filter-chip px-space-md py-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm rounded-lg transition-all" data-filter="video">
+            VIDEOTECA HD
+          </button>
+<button class="filter-chip px-space-md py-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm rounded-lg transition-all" data-filter="carto">
+            CARTOGRAFÍA 0°
+          </button>
+<button class="filter-chip px-space-md py-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm rounded-lg transition-all" data-filter="data">
+            DATOS &amp; APIS
+          </button>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: DIGITAL MAGAZINE 'ASTROCIENCIAS' -->
+<section class="w-full px-margin py-space-xl bg-surface-container-low" id="sec-magazines">
+<div class="flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-secondary uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">menu_book</span>
+<span>PUBLICACIONES PERIÓDICAS · ISSN 2953-6111</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-space-xs">
+            Revista Digital 'AstroCiencias'
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+            Ediciones trimestrales revisadas por pares y colaboradores de observatorios andinos. Distribución directa en formato digital abierto.
+          </p>
+</div>
+<a class="font-telemetry-sm text-telemetry-sm text-primary hover:text-primary-fixed flex items-center gap-space-xs" href="#catalogo-completo">
+<span>HISTORIAL COMPLETO DE ARCHIVOS</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Edition Card 1 (Current Issue) -->
+<div class="group relative flex flex-col bg-surface rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+<div class="relative h-72 w-full overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Portada estilizada de revista de astronomía con el Volcán Cotopaxi coronado por un cielo nocturno ecuatorial saturado de estrellas de la Vía Láctea, diseño editorial limpio, tipografía geométrica sutil, matices cian oscuro y oro estelar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfsWKEy-hIBc81aHRdnWzj2aE8yAThIQGY3c56X0DUmqQ9B-fpr2PG29LzQVAgGn9h4g-CE365cOEzkQWK42mIfNYotANjZvCohhufr1_fAoK9zVfEclEPu-y-J_EXVR3OnCwqUgbunhoepxi0Qj-V-NW48Gdask7v5UB5ofb3yRYGKTqX0r_Fp1hZxKmUKLv3o9NqoH7JZwyMRaV5wieb2h5KylhyyjOVe5LypTc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30"></div>
+<div class="absolute top-space-sm left-space-sm bg-primary-container text-on-primary-container px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+              EDICIÓN VIGENTE · N° 18
+            </div>
+<div class="absolute top-space-sm right-space-sm bg-surface/80 backdrop-blur-md text-on-surface px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+              24 MB · PDF
+            </div>
+</div>
+<div class="p-space-lg flex flex-col flex-1 justify-between gap-space-md">
+<div>
+<span class="font-telemetry-sm text-telemetry-sm text-secondary">ABRIL - JUNIO 2025</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs">
+                Cielos Andinos: Fenómenos de Cénit y Mitigación de Luz Artificial
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs line-clamp-3">
+                Monográfico dedicado al impacto del desarrollo urbano en los observatorios de Pichincha y Azuay, más un atlas visual de nebulosas visibles a latitud 0°.
+              </p>
+</div>
+<div class="pt-space-sm flex items-center justify-between gap-space-sm">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">58 PÁGINAS · A4</span>
+<button class="px-space-md py-space-sm bg-primary hover:bg-primary-fixed text-on-primary font-telemetry-sm text-telemetry-sm rounded-lg flex items-center gap-space-xs transition-colors" onclick="simulateDownload('Revista_AstroCiencias_N18.pdf')">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>DESCARGAR PDF</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Edition Card 2 -->
+<div class="group relative flex flex-col bg-surface rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+<div class="relative h-72 w-full overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Ilustración científica y fotográfica del radiotelescopio andino en una meseta ecuatoriana al atardecer, nubes bajas reflejando luz dorada, constelaciones emergiendo en un cielo índigo ultramar profundo." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBxUec8QnQ_VgqB2WinA-eaj6uK4DGcrg54tQiZhZ15F8rjcZpAly-UT4KCygJCJ-WaQXpkriRq29DRR-tE1z1s-SO6DKQ6B4dUzH9SIqw6ZeaIynfnGa3wVlkbvEs9PxgvpamlA76k0QZ-PkuB-hZGkc8LmRp6A-Dfvphu6a7cGYWuDRf0166iQM3TS_hg7s3ovPTZgqBp4tDER0AVJQ8dj5UnAQKJzeu1yUReM4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30"></div>
+<div class="absolute top-space-sm left-space-sm bg-surface-container-highest text-on-surface px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+              ARCHIVO · N° 17
+            </div>
+<div class="absolute top-space-sm right-space-sm bg-surface/80 backdrop-blur-md text-on-surface px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+              19 MB · PDF
+            </div>
+</div>
+<div class="p-space-lg flex flex-col flex-1 justify-between gap-space-md">
+<div>
+<span class="font-telemetry-sm text-telemetry-sm text-secondary">ENERO - MARZO 2025</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs">
+                Astrofísica de Altura: Radioastronomía en el Callejón Interandino
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs line-clamp-3">
+                Investigaciones sobre la captura de radiofuentes pulsátiles aprovechando la altitud geográfica y la delgada atmósfera de la sierra ecuatoriana.
+              </p>
+</div>
+<div class="pt-space-sm flex items-center justify-between gap-space-sm">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">52 PÁGINAS · A4</span>
+<button class="px-space-md py-space-sm bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-telemetry-sm text-telemetry-sm rounded-lg flex items-center gap-space-xs transition-colors" onclick="simulateDownload('Revista_AstroCiencias_N17.pdf')">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>DESCARGAR PDF</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Edition Card 3 -->
+<div class="group relative flex flex-col bg-surface rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+<div class="relative h-72 w-full overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Composición fotográfica de un eclipse solar anular proyectado sobre las Islas Galápagos, aguas del Océano Pacífico reflejando tonalidades turquesa oscuro y destellos solares anaranjados, diagrama de mecánica orbital superpuesto." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu7f6xIuVxPIYBBW_dnEELrPiO4PIr4bWZ1NtbM5HHKUcID_RCYUSmVQ-vLBVDxnuLBshZPr752lB9nTNZUVCJ57oSWMJ3q5C5CF-6z691iBY5RjipnBJ7LL_xW50nxP8pZdOwyFitCM2z9r0j6vCV6rfGqu1WnK9FS6PpjmjOBdDYyIFrATTWk3cpyZcBJzXDUhYOejPMwZQketP79DmWtC15Yp15bALgDdz3SuA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30"></div>
+<div class="absolute top-space-sm left-space-sm bg-surface-container-highest text-on-surface px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+              ARCHIVO · N° 16
+            </div>
+<div class="absolute top-space-sm right-space-sm bg-surface/80 backdrop-blur-md text-on-surface px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+              28 MB · PDF
+            </div>
+</div>
+<div class="p-space-lg flex flex-col flex-1 justify-between gap-space-md">
+<div>
+<span class="font-telemetry-sm text-telemetry-sm text-secondary">OCTUBRE - DICIEMBRE 2024</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs">
+                Mares Insulares: Expediciones de Ocultación en Galápagos
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs line-clamp-3">
+                Informe fotométrico y resultados de la campaña de ocultación estelar por asteroides troyanos registrada desde la Estación Charles Darwin.
+              </p>
+</div>
+<div class="pt-space-sm flex items-center justify-between gap-space-sm">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">64 PÁGINAS · A4</span>
+<button class="px-space-md py-space-sm bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-telemetry-sm text-telemetry-sm rounded-lg flex items-center gap-space-xs transition-colors" onclick="simulateDownload('Revista_AstroCiencias_N16.pdf')">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>DESCARGAR PDF</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: PODCAST CÓSMICO (SIMULATED AUDIO PLAYER + RECENT TRANSMISSIONS) -->
+<section class="w-full px-margin py-space-xl bg-surface" id="sec-audio">
+<div class="flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-primary uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">podcasts</span>
+<span>DIVULGACIÓN AUDITIVA SIN INTERMEDIARIOS</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-space-xs">
+            Podcast Cósmico: Ecos de la Mitad del Mundo
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+            Conversaciones profundas con astrofísicos ecuatorianos, divulgadores de la región y relatos de astronomía cultural andina.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm">
+<a class="px-space-md py-space-sm bg-surface-container-high hover:bg-surface-variant text-on-surface font-telemetry-sm text-telemetry-sm rounded-lg flex items-center gap-space-xs transition-colors" href="https://spotify.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-sm">graphic_eq</span>
+<span>SPOTIFY</span>
+</a>
+<a class="px-space-md py-space-sm bg-surface-container-high hover:bg-surface-variant text-on-surface font-telemetry-sm text-telemetry-sm rounded-lg flex items-center gap-space-xs transition-colors" href="https://youtube.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-sm">smart_display</span>
+<span>YOUTUBE AUDIO</span>
+</a>
+</div>
+</div>
+<!-- Live Interactive Audio Player Deck -->
+<div class="bg-surface-container-low p-space-lg rounded-xl shadow-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-center">
+<!-- Episode Info & Artwork -->
+<div class="lg:col-span-4 flex items-center gap-space-md">
+<div class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-surface-container-highest flex-shrink-0 overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Diseño conceptual de portada de podcast con un radiotelescopio estilizado emitiendo ondas de sonido hacia una constelación andina, paleta azul noche y oro técnico brillante." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAipB4zccadUsaI2J-U_GedC1bJ7AVAp6858bXWHJFbNzSwhfo1EEfkRfiqIM7cKFEHmDfYST7yIAN_PUvMi8xowi3NjSPxAesvi51g8F6hq_D0SeT4A0RQMQoTZwOyAH8YRgxaLAX5j8z3MKV2P_Fr14ZhlCtdin8Hg8gNkIo1ulC5st96l5NeqzdCvs2Z9Dw-wCGRRiNYwmlyB3gziXzHz-aS_s_l6UzydETuAxM"/>
+<div class="absolute inset-0 bg-primary/10"></div>
+</div>
+<div class="min-w-0">
+<span class="font-telemetry-sm text-telemetry-sm text-primary tracking-widest uppercase">EPISODIO EN REPRODUCCIÓN</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface truncate mt-space-xs" id="player-title">
+                #26: Radiación de Fondo y el Observatorio de Quito
+              </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate" id="player-speaker">
+                Dra. Elena Proaño (EPN) &amp; Ing. Mateo Cobos
+              </p>
+</div>
+</div>
+<!-- Controls & Animated Audio Waveform -->
+<div class="lg:col-span-8 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<button class="p-space-xs text-on-surface-variant hover:text-primary transition-colors" id="audio-prev-btn">
+<span class="material-symbols-outlined">skip_previous</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-primary hover:bg-primary-fixed text-on-primary flex items-center justify-center transition-transform hover:scale-105" id="audio-play-btn">
+<span class="material-symbols-outlined text-2xl" id="play-icon">play_arrow</span>
+</button>
+<button class="p-space-xs text-on-surface-variant hover:text-primary transition-colors" id="audio-next-btn">
+<span class="material-symbols-outlined">skip_next</span>
+</button>
+</div>
+<!-- Inline Simulated Audio Visualizer Bars -->
+<div class="hidden sm:flex items-end gap-1 h-8 flex-1 max-w-xs mx-space-md" id="audio-visualizer">
+<span class="w-1 bg-primary/40 rounded-full h-3 transition-all duration-150"></span>
+<span class="w-1 bg-primary/60 rounded-full h-6 transition-all duration-150"></span>
+<span class="w-1 bg-primary rounded-full h-8 transition-all duration-150"></span>
+<span class="w-1 bg-primary/70 rounded-full h-4 transition-all duration-150"></span>
+<span class="w-1 bg-secondary rounded-full h-7 transition-all duration-150"></span>
+<span class="w-1 bg-secondary/80 rounded-full h-5 transition-all duration-150"></span>
+<span class="w-1 bg-primary rounded-full h-8 transition-all duration-150"></span>
+<span class="w-1 bg-primary/50 rounded-full h-3 transition-all duration-150"></span>
+<span class="w-1 bg-primary/70 rounded-full h-6 transition-all duration-150"></span>
+<span class="w-1 bg-secondary/60 rounded-full h-4 transition-all duration-150"></span>
+<span class="w-1 bg-primary rounded-full h-7 transition-all duration-150"></span>
+<span class="w-1 bg-primary/30 rounded-full h-2 transition-all duration-150"></span>
+</div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-on-surface-variant">
+<span id="player-time-current">14:22</span>
+<span>/</span>
+<span id="player-time-total">48:10</span>
+</div>
+</div>
+<!-- Progress Track -->
+<div class="relative w-full h-2 bg-surface-container-highest rounded-full overflow-hidden cursor-pointer" id="progress-container">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full w-[32%] transition-all" id="player-progress"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Episode Playlist Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Ep 26 -->
+<div class="p-space-md bg-surface-container rounded-xl flex flex-col justify-between gap-space-sm hover:bg-surface-container-high transition-colors cursor-pointer group" onclick="switchEpisode('#26: Radiación de Fondo y el Observatorio de Quito', 'Dra. Elena Proaño (EPN) &amp; Ing. Mateo Cobos', '48:10')">
+<div>
+<div class="flex items-center justify-between font-telemetry-sm text-telemetry-sm text-secondary">
+<span>TEMPORADA 3 · EP 26</span>
+<span class="text-primary font-semibold">ACTIVO</span>
+</div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs group-hover:text-primary transition-colors">
+              Radiación de Fondo y el Observatorio de Quito
+            </h5>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+              Historia instrumental del telescopio Merz de 1875 y los aportes modernos a la cosmología observacional.
+            </p>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-telemetry-sm text-telemetry-sm text-outline">
+<span>DURACIÓN: 48 MIN</span>
+<span class="material-symbols-outlined text-sm text-primary">play_circle</span>
+</div>
+</div>
+<!-- Ep 25 -->
+<div class="p-space-md bg-surface-container rounded-xl flex flex-col justify-between gap-space-sm hover:bg-surface-container-high transition-colors cursor-pointer group" onclick="switchEpisode('#25: Exoplanetas Detectables desde Latitud Cero', 'Dr. Carlos Moncayo (Escuela Politécnica)', '54:30')">
+<div>
+<div class="flex items-center justify-between font-telemetry-sm text-telemetry-sm text-outline">
+<span>TEMPORADA 3 · EP 25</span>
+<span>12 MAY 2025</span>
+</div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs group-hover:text-primary transition-colors">
+              Exoplanetas Detectables desde Latitud Cero
+            </h5>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+              Ventajas trigonométricas únicas de observar tránsitos planetarios en ambos hemisferios celestes.
+            </p>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-telemetry-sm text-telemetry-sm text-outline">
+<span>DURACIÓN: 54 MIN</span>
+<span class="material-symbols-outlined text-sm group-hover:text-primary transition-colors">play_circle</span>
+</div>
+</div>
+<!-- Ep 24 -->
+<div class="p-space-md bg-surface-container rounded-xl flex flex-col justify-between gap-space-sm hover:bg-surface-container-high transition-colors cursor-pointer group" onclick="switchEpisode('#24: Arqueoastronomía en Cochasquí y Catequilla', 'Lic. Silvia Andino (Centro de Investigaciones)', '41:15')">
+<div>
+<div class="flex items-center justify-between font-telemetry-sm text-telemetry-sm text-outline">
+<span>TEMPORADA 3 · EP 24</span>
+<span>28 ABR 2025</span>
+</div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs group-hover:text-primary transition-colors">
+              Arqueoastronomía en Cochasquí y Catequilla
+            </h5>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+              Alineaciones equinocciales de pirámides prehispánicas y el calendario solar de los pueblos originarios.
+            </p>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-telemetry-sm text-telemetry-sm text-outline">
+<span>DURACIÓN: 41 MIN</span>
+<span class="material-symbols-outlined text-sm group-hover:text-primary transition-colors">play_circle</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: YOUTUBE MEDIA & VIDEO LIBRARY -->
+<section class="w-full px-margin py-space-xl bg-surface-container-low" id="sec-video">
+<div class="flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-secondary uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">video_library</span>
+<span>CANAL OFICIAL &amp; VIDEOTECA DE OBSERVACIÓN</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-space-xs">
+            Conferencias, En Vivos y Talleres Técnicos
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+            Transmisiones en directo con telescopios automatizados, ponencias magistrales y calibración de instrumentos ópticos.
+          </p>
+</div>
+<a class="px-space-md py-space-sm bg-error-container text-on-error-container hover:bg-error hover:text-on-error font-telemetry-sm text-telemetry-sm rounded-lg flex items-center gap-space-xs transition-colors" href="https://youtube.com/@AstroCienciasEC" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-sm">subscriptions</span>
+<span>SUSCRIBIRSE AL CANAL</span>
+</a>
+</div>
+<!-- Bento Grid for Videos -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Main Featured Video / Live Stream Archive -->
+<div class="lg:col-span-8 bg-surface rounded-xl overflow-hidden shadow-md flex flex-col group">
+<div class="relative w-full aspect-video bg-surface-container-lowest overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" data-alt="Fotografía cinematográfica de una sesión nocturna de astronomía en vivo con telescopio Schmidt-Cassegrain computarizado apuntando al firmamento andino estrellado, pantallas de monitoreo con gráficos celestes emitiendo suave luz cian." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUefm-RRWzB95CeoHPpTQB_Aw8wkJmrbgr__AfiICqdMjQeDt-Bv0iC1hc9iQrOVuREAuOkRCXp2lSbQ7_20DDyVMee5z2zxgDRrwithFkEko_frj_cJHtNsslIGHuCNVLQRZZZoCOgrtA4Go0sVRl1khunBzAMCjQfjAPVn5Qd1hl4hPJoKg4SdO3Gqs_48AZ2XspScHN6SH3mWSTz_ugtqj0j5wXb-AIzRyDSPg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/40"></div>
+<div class="absolute top-space-md left-space-md flex items-center gap-space-xs bg-error text-on-error px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm">
+<span class="inline-block w-2 h-2 rounded-full bg-white animate-ping"></span>
+<span>SESIÓN ESPECIAL GRABADA</span>
+</div>
+<div class="absolute bottom-space-md right-space-md bg-surface/90 px-space-sm py-space-xs rounded font-telemetry-sm text-telemetry-sm text-on-surface">
+              1:24:18 · 4K UHD
+            </div>
+<button class="absolute inset-0 m-auto w-16 h-16 rounded-full bg-primary/90 text-on-primary flex items-center justify-center backdrop-blur-sm shadow-xl hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">play_arrow</span>
+</button>
+</div>
+<div class="p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm font-telemetry-sm text-telemetry-sm text-secondary">
+<span>CONFERENCIA MAGISTRAL · MAYO 2025</span>
+<span>•</span>
+<span>12.4K VISUALIZACIONES</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">
+              Alineación Planetaria Mayor y Fotometría con Telescopios de Aficionado
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Taller exhaustivo impartido en colaboración con la Asociación Ecuatoriana de Astronomía. Técnicas de apilado con software libre (Siril, AstroSurface) para mitigar turbulencias térmicas en altitudes superiores a los 2,800 msnm.
+            </p>
+</div>
+</div>
+<!-- Video Secondary Column (2 smaller cards) -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Video 2 -->
+<div class="bg-surface rounded-xl overflow-hidden shadow-md flex flex-col group">
+<div class="relative w-full aspect-video bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Detalle de primer plano de la colimación de un espejo parabólico de telescopio reflector newtoniano en un taller astronómico limpio, luz técnica cenital fría, destello dorado en el ocular." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHKG4jdSuuHl8EYa3BENmvtImQQ1diFd7gX6QkLJBF6VYOCA5923nDo_ZCS-EtJgOKebQmU9CYRVWq6AOnM7GHZvd1eB9fje9jaMYbt0i_FioCspf_sLdEPzOqy5v-zraLVQ2vJMDoMx7KcHec2KYSnybHydddLJgDV4ypRhdjuJP-b6D0YV63MVE-YjebFKskoK1qiRu4GU6QBonCdQ7nRxFZBmu2wwWNTbNl2mQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30"></div>
+<div class="absolute bottom-space-xs right-space-xs bg-surface/80 px-space-xs py-0.5 rounded font-telemetry-sm text-telemetry-sm text-on-surface">
+                18:42
+              </div>
+</div>
+<div class="p-space-md flex flex-col gap-space-xs">
+<span class="font-telemetry-sm text-telemetry-sm text-primary">TUTORIAL PRÁCTICO</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-tight group-hover:text-primary transition-colors">
+                Colimación Láser de Telescopios Reflectores
+              </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+                Paso a paso para alinear óptica secundaria antes de salir a expediciones de montaña.
+              </p>
+</div>
+</div>
+<!-- Video 3 -->
+<div class="bg-surface rounded-xl overflow-hidden shadow-md flex flex-col group">
+<div class="relative w-full aspect-video bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cielo crepuscular sobre la línea ecuatorial con la Luna creciente y el planeta Venus en conjunción brillante, silueta de volcanes andinos al fondo en tonos azul marino." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtioAQpkTyF7z8MB697_MUPdtRjCOVx99z_WGdNtIznUwZhtC27AEgUGgoa9ofBnfuAmEMNemOmG7gmsvRiPkFBHRcZrd7uws-5taNTNdfE1Y0xMMQP0WDzrchd8uZJNouNV_GhXrwCMASyretywlZAuX9IvE1IwEX-xFwCKBUbLRm3ApkdzT35iKv9FQynuFcllxqQq4ZRbzk2rlP1QZgafiD2jRp35ozC6VKMKw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30"></div>
+<div class="absolute bottom-space-xs right-space-xs bg-surface/80 px-space-xs py-0.5 rounded font-telemetry-sm text-telemetry-sm text-on-surface">
+                32:05
+              </div>
+</div>
+<div class="p-space-md flex flex-col gap-space-xs">
+<span class="font-telemetry-sm text-telemetry-sm text-secondary">DOCUMENTAL BREVE</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-tight group-hover:text-primary transition-colors">
+                El Cielo sin Estaciones: Ventaja de la Latitud 0°
+              </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+                Cómo la ausencia de inclinación orbital permite divisar la Cruz del Sur y la Osa Mayor en la misma noche.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: CARTOGRAPHY & EQUATORIAL SKY GUIDES (LATITUDE 0°) -->
+<section class="w-full px-margin py-space-xl bg-surface" id="sec-carto">
+<div class="flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-primary uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">explore</span>
+<span>CARTOGRAFÍA CELESTE ADAPTADA · COORDENADAS ECUATORIALES</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-space-xs">
+            Cartografía y Guías del Cielo Ecuatorial (Latitud 0°)
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+            Proyecciones planas y circulares calibradas específicamente para la observación desde la franja ecuatorial de los Andes y la Costa del Pacífico.
+          </p>
+</div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-secondary">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>CALIBRACIÓN EPOCA J2000.0</span>
+</div>
+</div>
+<!-- Cartography Showcase Split -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+<!-- Technical Vector Map Preview -->
+<div class="lg:col-span-7 bg-surface-container-low p-space-lg rounded-xl relative overflow-hidden">
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-telemetry-sm text-telemetry-sm text-primary">RETÍCULA EQUATORIAL COORD: DEC 00°00'00" / RA 00h~24h</span>
+<span class="font-telemetry-sm text-telemetry-sm text-outline">VERSIÓN VECTORIAL SVG/PDF</span>
+</div>
+<!-- Interactive Planisphere Graphic (SVG Technical Instrumentation) -->
+<div class="relative w-full aspect-square max-w-md mx-auto flex items-center justify-center p-space-sm">
+<svg class="w-full h-full text-primary" fill="none" viewbox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+<!-- Concentric Declination rings -->
+<circle cx="200" cy="200" r="190" stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.2" stroke-width="1.5"></circle>
+<circle cx="200" cy="200" r="150" stroke="currentColor" stroke-opacity="0.3" stroke-width="1"></circle>
+<circle cx="200" cy="200" r="110" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5"></circle>
+<circle cx="200" cy="200" r="70" stroke="currentColor" stroke-dasharray="2 2" stroke-opacity="0.25" stroke-width="1"></circle>
+<circle cx="200" cy="200" r="30" stroke="currentColor" stroke-opacity="0.5" stroke-width="1"></circle>
+<!-- Crosshairs for 0° Lat (East-West Horizon is the True Center) -->
+<line stroke="currentColor" stroke-opacity="0.5" stroke-width="1" x1="200" x2="200" y1="10" y2="390"></line>
+<line stroke="currentColor" stroke-opacity="0.8" stroke-width="1.5" x1="10" x2="390" y1="200" y2="200"></line>
+<!-- Meridian and Zenith Points -->
+<circle cx="200" cy="200" fill="currentColor" r="4"></circle>
+<text fill="currentColor" font-family="JetBrains Mono" font-size="9" letter-spacing="0.05em" x="206" y="196">ZÉNIT 0°</text>
+<!-- Cardinal markers -->
+<text fill="#c6b99b" font-family="Space Grotesk" font-size="12" font-weight="600" x="195" y="26">N (0°)</text>
+<text fill="#c6b99b" font-family="Space Grotesk" font-size="12" font-weight="600" x="195" y="385">S (180°)</text>
+<text fill="#c6b99b" font-family="Space Grotesk" font-size="12" font-weight="600" x="365" y="204">E (90°)</text>
+<text fill="#c6b99b" font-family="Space Grotesk" font-size="12" font-weight="600" x="18" y="204">W (270°)</text>
+<!-- Simulated Stars & Constellations overlay -->
+<!-- Orion belt -->
+<circle cx="200" cy="180" fill="#ffffff" r="2.5"></circle>
+<circle cx="208" cy="182" fill="#ffffff" r="2.2"></circle>
+<circle cx="216" cy="184" fill="#ffffff" r="2.5"></circle>
+<line stroke="currentColor" stroke-opacity="0.4" stroke-width="0.75" x1="200" x2="216" y1="180" y2="184"></line>
+<text fill="#7fd0fe" font-family="JetBrains Mono" font-size="7" x="218" y="178">ORION (ECUADOR CELESTE)</text>
+<!-- Southern Cross -->
+<circle cx="210" cy="300" fill="#ffffff" r="2"></circle>
+<circle cx="210" cy="320" fill="#ffffff" r="2"></circle>
+<circle cx="200" cy="310" fill="#ffffff" r="2"></circle>
+<circle cx="220" cy="310" fill="#ffffff" r="2"></circle>
+<line stroke="currentColor" stroke-opacity="0.3" stroke-width="0.5" x1="210" x2="210" y1="300" y2="320"></line>
+<line stroke="currentColor" stroke-opacity="0.3" stroke-width="0.5" x1="200" x2="220" y1="310" y2="310"></line>
+<text fill="#d3c5a7" font-family="JetBrains Mono" font-size="7" x="224" y="312">CRUX (SUR)</text>
+<!-- Ursa Major hint -->
+<circle cx="185" cy="80" fill="#ffffff" r="2"></circle>
+<circle cx="195" cy="75" fill="#ffffff" r="2"></circle>
+<circle cx="170" cy="90" fill="#ffffff" r="2"></circle>
+<text fill="#7fd0fe" font-family="JetBrains Mono" font-size="7" x="120" y="85">URSA MAJOR (NORTE)</text>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-space-md text-on-surface-variant font-telemetry-sm text-telemetry-sm">
+<span>PROYECCIÓN ESTEREOGRÁFICA BIPOLAR</span>
+<span class="text-primary cursor-pointer hover:underline" onclick="simulateDownload('Carta_Celeste_Ecuatorial_2025_Vectorial.pdf')">
+              DESCARGAR CARTA COMPLETA (PDF/SVG)
+            </span>
+</div>
+</div>
+<!-- Download List of Specialized Field Guides -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Guide 1 -->
+<div class="p-space-md bg-surface-container rounded-xl flex items-center justify-between gap-space-md hover:bg-surface-container-high transition-colors">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-2xl mt-0.5">map</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">
+                  Guía Celeste Andina (Suelos &gt;2,500 msnm)
+                </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                  Optimizado para zonas de alta transparencia atmosférica en Quito, Cuenca, Riobamba y páramos.
+                </p>
+<span class="font-telemetry-sm text-telemetry-sm text-secondary mt-space-xs inline-block">PDF IMPRIMIBLE EN INVERSO (MODO NOCTURNO ROJO)</span>
+</div>
+</div>
+<button class="p-space-sm bg-surface-container-highest hover:bg-primary hover:text-on-primary rounded-lg transition-colors flex-shrink-0" onclick="simulateDownload('Guia_Celeste_Andes_Ecuador.pdf')" title="Descargar Guía Andina">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- Guide 2 -->
+<div class="p-space-md bg-surface-container rounded-xl flex items-center justify-between gap-space-md hover:bg-surface-container-high transition-colors">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-2xl mt-0.5">water</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">
+                  Carta del Cielo Costero y Archipiélago
+                </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                  Correcciones de humedad marina y horizonte oeste libre para Manabí, Santa Elena y Galápagos.
+                </p>
+<span class="font-telemetry-sm text-telemetry-sm text-outline mt-space-xs inline-block">INCLUYE TABLA DE EXTINCIÓN ATMOSFÉRICA</span>
+</div>
+</div>
+<button class="p-space-sm bg-surface-container-highest hover:bg-primary hover:text-on-primary rounded-lg transition-colors flex-shrink-0" onclick="simulateDownload('Guia_Celeste_Costa_Galapagos.pdf')" title="Descargar Guía Costera">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- Guide 3 -->
+<div class="p-space-md bg-surface-container rounded-xl flex items-center justify-between gap-space-md hover:bg-surface-container-high transition-colors">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-2xl mt-0.5">school</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">
+                  Kit Educativo: Planisferio Ecuatorial Armable
+                </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                  Plantilla imprimible en cartulina para colegios y clubes escolares. Permite calcular el cielo visible cualquier día a cualquier hora.
+                </p>
+<span class="font-telemetry-sm text-telemetry-sm text-primary mt-space-xs inline-block">INCLUYE INSTRUCCIONES DE MONTAJE</span>
+</div>
+</div>
+<button class="p-space-sm bg-surface-container-highest hover:bg-primary hover:text-on-primary rounded-lg transition-colors flex-shrink-0" onclick="simulateDownload('Planisferio_Armable_Escolar_Ecuador.pdf')" title="Descargar Planisferio Armable">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: OPEN DATA & APIS (EFEMÉRIDES & SOLAR CATALOG) -->
+<section class="w-full px-margin py-space-xl bg-surface-container-low" id="sec-data">
+<div class="flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-secondary uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">terminal</span>
+<span>DATOS ABIERTOS &amp; PROTOCOLOS DE INTEGRACIÓN</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-space-xs">
+            Endpoints de Efemérides &amp; Catálogo Solar
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+            API REST pública y volcado de datos tabulares (JSON/CSV) calculados en tiempo real para centros educativos, proyectos IoT de telescopios y tesistas.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">STATUS DE LA API:</span>
+<span class="px-space-sm py-0.5 bg-primary-container text-on-primary-container rounded font-telemetry-sm text-telemetry-sm">99.98% OPERATIVA</span>
+</div>
+</div>
+<!-- Data API Showcase: Live Terminal Preview + Data Tables -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Live Code/Terminal Mockup -->
+<div class="lg:col-span-6 bg-surface-container-lowest p-space-md rounded-xl shadow-inner flex flex-col font-telemetry-sm text-telemetry-sm">
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-highest">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-error inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-secondary inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-primary inline-block"></span>
+<span class="ml-space-sm text-outline">GET /v1/ephemeris/sun?lat=0.0000&amp;lon=-78.4678</span>
+</div>
+<button class="text-primary hover:text-primary-fixed flex items-center gap-1" id="copy-btn" onclick="copySnippet()">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+<span>COPIAR</span>
+</button>
+</div>
+<pre class="p-space-md text-on-surface overflow-x-auto leading-relaxed"><code>{
+  <span class="text-primary">"status"</span>: <span class="text-secondary">"success"</span>,
+  <span class="text-primary">"observer"</span>: {
+    <span class="text-primary">"station"</span>: <span class="text-on-surface-variant">"AstroCiencias - Nodo Pichincha"</span>,
+    <span class="text-primary">"coordinates"</span>: [<span class="text-secondary">0.0000</span>, <span class="text-secondary">-78.4678</span>],
+    <span class="text-primary">"altitude_meters"</span>: <span class="text-secondary">2850</span>
+  },
+  <span class="text-primary">"solar_telemetry"</span>: {
+    <span class="text-primary">"azimuth_deg"</span>: <span class="text-secondary">272.41</span>,
+    <span class="text-primary">"altitude_deg"</span>: <span class="text-secondary">48.19</span>,
+    <span class="text-primary">"zenith_distance_deg"</span>: <span class="text-secondary">41.81</span>,
+    <span class="text-primary">"solar_noon_utc"</span>: <span class="text-on-surface-variant">"17:14:02Z"</span>,
+    <span class="text-primary">"uv_index_predicted"</span>: <span class="text-secondary">11.4</span>
+  },
+  <span class="text-primary">"active_phenomena"</span>: [
+    {
+      <span class="text-primary">"event"</span>: <span class="text-on-surface-variant">"Sol Cenital Semestral"</span>,
+      <span class="text-primary">"deviation_deg"</span>: <span class="text-secondary">0.12</span>,
+      <span class="text-primary">"shadow_ratio"</span>: <span class="text-secondary">0.002</span>
+    }
+  ]
+}</code></pre>
+<div class="mt-auto pt-space-sm flex items-center justify-between text-outline">
+<span>AUTENTICACIÓN: NO REQUERIDA (OPEN DATA)</span>
+<span>RATE LIMIT: 60 REQ/MIN</span>
+</div>
+</div>
+<!-- Downloadable Data Tables / Catalogs -->
+<div class="lg:col-span-6 flex flex-col gap-space-md">
+<div class="p-space-md bg-surface rounded-xl flex flex-col justify-between gap-space-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-primary">
+<span class="material-symbols-outlined text-sm">table_chart</span>
+<span>DATASET CSV / SQLITE</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs">
+                  Catálogo Solar y Radiación Andina 2024-2025
+                </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+                  Registro horario de radiación global, manchas solares (Wolf Number) y eventos cromosféricos capturados desde estaciones de aficionados asociadas.
+                </p>
+</div>
+</div>
+<div class="pt-space-sm flex items-center justify-between">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">TAMAÑO: 14.2 MB · 17,520 REGISTROS</span>
+<button class="px-space-md py-space-xs bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-telemetry-sm text-telemetry-sm rounded-lg transition-colors flex items-center gap-1" onclick="simulateDownload('Catalogo_Solar_AstroCiencias_2024_2025.csv')">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>DESCARGAR CSV</span>
+</button>
+</div>
+</div>
+<div class="p-space-md bg-surface rounded-xl flex flex-col justify-between gap-space-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs font-telemetry-sm text-telemetry-sm text-secondary">
+<span class="material-symbols-outlined text-sm">data_object</span>
+<span>JSON ARCHIVE</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mt-space-xs">
+                  Efemérides Lunares &amp; Satélites Visibles (ISS / Tiangong)
+                </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+                  Pases de estaciones espaciales sobre ciudades ecuatorianas con ángulos de elevación mayores a 45°, calculados a partir de los últimos TLE de NORAD.
+                </p>
+</div>
+</div>
+<div class="pt-space-sm flex items-center justify-between">
+<span class="font-telemetry-sm text-telemetry-sm text-outline">ACTUALIZADO DIARIAMENTE · REST API</span>
+<button class="px-space-md py-space-xs bg-surface-container-high hover:bg-secondary hover:text-on-secondary text-on-surface font-telemetry-sm text-telemetry-sm rounded-lg transition-colors flex items-center gap-1" onclick="simulateDownload('Efemerides_Pases_Satelitales_Ecuador.json')">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>DESCARGAR JSON</span>
+</button>
+</div>
+</div>
+<!-- Documentation Callout -->
+<div class="p-space-md bg-surface-container rounded-xl flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-2xl">code</span>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Documentación OpenAPI / Swagger</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Consulta especificaciones completas para integrar datos en Python, R o Node.js.</div>
+</div>
+</div>
+<a class="px-space-md py-space-sm bg-primary-container text-on-primary-container hover:bg-primary font-telemetry-sm text-telemetry-sm rounded-lg transition-colors whitespace-nowrap" href="#docs">
+              VER DOCS
+            </a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 7: COLLABORATIVE SUBMISSION CALLOUT -->
+<section class="w-full px-margin py-space-xl bg-surface">
+<div class="bg-gradient-to-r from-surface-container-low via-surface-container to-surface-container-low p-space-xl rounded-xl border border-surface-variant/30 flex flex-col md:flex-row items-center justify-between gap-space-lg">
+<div class="max-w-2xl">
+<span class="font-telemetry-sm text-telemetry-sm text-secondary tracking-widest uppercase">CONVOCATORIA PERMANENTE</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-space-xs">
+          ¿Generas contenido científico o astrofotografía en Ecuador?
+        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+          Publica tus cartas, artículos de divulgación o episodios en nuestra red de recursos abiertos con el respaldo técnico y difusión de AstroCiencias Ecuador.
+        </p>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-shrink-0">
+<button class="px-space-lg py-space-md bg-secondary text-on-secondary hover:bg-secondary-fixed font-headline-sm text-headline-sm text-sm rounded-lg transition-colors shadow-md" onclick="alert('Formulario de postulación de recursos abierto. Escríbenos a contacto@astrociencias.ec con el asunto [RECURSO-OPEN].')">
+          Postular Recurso
+        </button>
+<button class="px-space-md py-space-md bg-surface-container-high text-on-surface hover:bg-surface-variant font-telemetry-sm text-telemetry-sm rounded-lg transition-colors" onclick="document.getElementById('sec-carto').scrollIntoView({behavior: 'smooth'})">
+          Explorar Cartografía
+        </button>
+</div>
+</div>
+</section>
+<!-- Interactive Toast Notification container for Downloads -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-surface-container-highest text-on-surface px-space-md py-space-sm rounded-lg shadow-2xl border border-primary/30 flex items-center gap-space-sm" id="toast-notify">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<span class="font-telemetry-sm text-telemetry-sm" id="toast-text">Iniciando descarga segura...</span>
+</div>
+</div>
+<script>
+  // Dynamic Realtime Clock in Equatorial Station format
+  function updateStationClock() {
+    const el = document.getElementById('astronomic-clock');
+    if (!el) return;
+    const now = new Date();
+    const utcHours = String(now.getUTCHours()).padStart(2, '0');
+    const utcMinutes = String(now.getUTCMinutes()).padStart(2, '0');
+    const utcSeconds = String(now.getUTCSeconds()).padStart(2, '0');
+    el.innerText = `UTC ${utcHours}:${utcMinutes}:${utcSeconds} · LAT 0°0'0" NODO ACTIVO`;
+  }
+  setInterval(updateStationClock, 1000);
+  updateStationClock();
+
+  // Simulated Download Notification Toast
+  function simulateDownload(filename) {
+    const toast = document.getElementById('toast-notify');
+    const toastText = document.getElementById('toast-text');
+    if (!toast || !toastText) return;
+    
+    toastText.innerText = `Descargando: ${filename} (Acceso Libre)`;
+    toast.classList.remove('translate-y-24', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    
+    setTimeout(() => {
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-24', 'opacity-0');
+    }, 3500);
+  }
+
+  // Audio Player State Simulation
+  let isPlaying = false;
+  const playBtn = document.getElementById('audio-play-btn');
+  const playIcon = document.getElementById('play-icon');
+  const progressBar = document.getElementById('player-progress');
+  const visualizerBars = document.querySelectorAll('#audio-visualizer span');
+
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playIcon.innerText = 'pause';
+        animateVisualizer(true);
+      } else {
+        playIcon.innerText = 'play_arrow';
+        animateVisualizer(false);
+      }
+    });
+  }
+
+  function animateVisualizer(active) {
+    visualizerBars.forEach((bar, index) => {
+      if (active) {
+        bar.style.transform = `scaleY(${0.3 + Math.random() * 0.9})`;
+      } else {
+        bar.style.transform = 'scaleY(0.4)';
+      }
+    });
+  }
+
+  // Visualizer tick when active
+  setInterval(() => {
+    if (isPlaying) {
+      animateVisualizer(true);
+    }
+  }, 300);
+
+  function switchEpisode(title, speaker, totalTime) {
+    const titleEl = document.getElementById('player-title');
+    const speakerEl = document.getElementById('player-speaker');
+    const totalEl = document.getElementById('player-time-total');
+    const currentEl = document.getElementById('player-time-current');
+
+    if (titleEl) titleEl.innerText = title;
+    if (speakerEl) speakerEl.innerText = speaker;
+    if (totalEl) totalEl.innerText = totalTime;
+    if (currentEl) currentEl.innerText = "00:00";
+    if (progressBar) progressBar.style.width = "0%";
+
+    isPlaying = true;
+    if (playIcon) playIcon.innerText = 'pause';
+    animateVisualizer(true);
+  }
+
+  // Copy API snippet function
+  function copySnippet() {
+    const textToCopy = 'curl -X GET "https://api.astrociencias.ec/v1/ephemeris/sun?lat=0.0000&lon=-78.4678"';
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      const btn = document.getElementById('copy-btn');
+      if (btn) {
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = `<span class="material-symbols-outlined text-sm">check</span><span>COPIADO</span>`;
+        setTimeout(() => {
+          btn.innerHTML = originalContent;
+        }, 2000);
+      }
+    });
+  }
+
+  // Interactive Filter Button Behavior
+  const filterButtons = document.querySelectorAll('.filter-chip');
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary');
+        b.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+      });
+      btn.classList.add('bg-primary', 'text-on-primary');
+      btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+
+      const target = btn.getAttribute('data-filter');
+      const sections = {
+        magazines: document.getElementById('sec-magazines'),
+        audio: document.getElementById('sec-audio'),
+        video: document.getElementById('sec-video'),
+        carto: document.getElementById('sec-carto'),
+        data: document.getElementById('sec-data')
+      };
+
+      if (target === 'all') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (sections[target]) {
+        sections[target].scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Client-side quick filter simulation in search input
+  const searchInput = document.getElementById('resource-search');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = searchInput.value.toLowerCase().trim();
+        if (val.includes('revista') || val.includes('pdf')) {
+          document.getElementById('sec-magazines')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (val.includes('podcast') || val.includes('audio') || val.includes('episodio')) {
+          document.getElementById('sec-audio')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (val.includes('video') || val.includes('youtube') || val.includes('taller')) {
+          document.getElementById('sec-video')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (val.includes('mapa') || val.includes('carta') || val.includes('cielo')) {
+          document.getElementById('sec-carto')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (val.includes('api') || val.includes('datos') || val.includes('solar')) {
+          document.getElementById('sec-data')?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          simulateDownload(`Busqueda_${val || 'general'}.json`);
+        }
+      }
+    });
+  }
+</script></main><footer class="w-full bg-surface-container-lowest py-space-xl"><div class="w-full px-margin"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-gutter pb-space-xl"><div class="lg:col-span-2 flex flex-col gap-space-sm"><div class="flex items-center gap-space-sm"><img alt="AstroCiencias Ecuador Logo" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1U7CSqgi7crmhw-U7Y86PGNeff-1xp0SitpH0eqNfADNqCMkJwcO_W1GiQGEWZsPZwfMQZuy0OjcnV_tG8x3UUewLe7LP1oY-B4eMcJpR5Jjov334LBXyaNYFzpHRpZR9OLrKQBaHbo7BuoZCfxCROAnGBWXX8pdXe3NUCRyztVyOzj13WDDgxmHdrZaj6xuaDduLtIJOvnoOyymsm3QU-Zxaborzd7QAObr5P8ytYn64xvfZiHPy3L0g"/><span class="font-headline-sm text-headline-sm text-on-surface font-semibold">AstroCiencias Ecuador</span></div><p class="font-body-sm text-body-sm text-on-surface-variant max-w-sm">Divulgación de astronomía, ciencias espaciales y vocación científica en la mitad del mundo - Ecuador.</p><div class="flex items-center gap-space-xs text-primary font-telemetry-sm text-telemetry-sm pt-space-xs"><span class="material-symbols-outlined text-sm">public</span><span>Observación astronómica ecuatorial</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-sm text-on-surface uppercase tracking-wider font-semibold">Navegación</span><ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><li><a class="hover:text-primary transition-colors" data-path="inicio" href="#">Inicio</a></li><li><a class="hover:text-primary transition-colors" data-path="quienes-somos" href="#">Quiénes somos</a></li><li><a class="hover:text-primary transition-colors" data-path="blog" href="#">Blog científico</a></li><li><a class="hover:text-primary transition-colors" data-path="eventos" href="#">Eventos y talleres</a></li></ul></div><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-sm text-on-surface uppercase tracking-wider font-semibold">Recursos</span><ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><li><a class="hover:text-primary transition-colors" data-path="recursos" href="#">Guías de observación</a></li><li><a class="hover:text-primary transition-colors" data-path="recursos" href="#">Cartas celestes</a></li><li><a class="hover:text-primary transition-colors" data-path="recursos" href="#">Efemérides ecuatorianas</a></li><li><a class="hover:text-primary transition-colors" data-path="colabora" href="#">Red de divulgadores</a></li></ul></div><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-sm text-on-surface uppercase tracking-wider font-semibold">Contacto</span><ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><li><a class="hover:text-primary transition-colors flex items-center gap-space-xs" href="mailto:contacto@astrociencias.ec"><span class="material-symbols-outlined text-sm">mail</span>contacto@astrociencias.ec</a></li><li class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-sm">location_on</span>Quito - Ecuador (0° 0' 0")</li><li><a class="hover:text-primary transition-colors" data-path="colabora" href="#">Voluntariado y alianzas</a></li></ul></div></div><div class="pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md"><p class="font-telemetry-sm text-telemetry-sm text-on-surface-variant text-center md:text-left">© 2012-2025 AstroCiencias Ecuador (Observación y divulgación a nivel nacional, Latitud 0° Ecuador).</p><div class="flex items-center gap-space-lg font-telemetry-sm text-telemetry-sm text-on-surface-variant"><span class="hover:text-primary transition-colors cursor-pointer flex items-center gap-space-xs"><span class="material-symbols-outlined text-sm">share</span>Redes y Comunidad</span><span class="hover:text-primary transition-colors cursor-pointer flex items-center gap-space-xs"><span class="material-symbols-outlined text-sm">satellite_alt</span>Misiones</span></div></div></div></footer></body></html>

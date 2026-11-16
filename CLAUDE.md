@@ -16,12 +16,15 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 - `src/pages/index.astro`: portada.
 - `src/content/blog/`: un `.md` por artículo; esquema en `src/content.config.ts`.
 - `src/content/autores/`: un `.yaml` por autor; los artículos lo citan en `autor` por su nombre de archivo.
+- `src/content/revista/`: un `.md` por número de la revista Astro&Ciencias (colección «Revista Astro&Ciencias» en Keystatic): número, título, periodo, fecha, portada (`public/images/revista/`), enlace al PDF (Google Drive o la web de la revista; los PDF no se suben al repositorio) y el texto de qué trae el número. Funciones en `src/lib/revista.ts`: orden (la más reciente por fecha es la «Edición vigente») y extracto (primer párrafo del texto).
+  - Página de cada número: `/recursos/revista/<slug>` (`src/pages/recursos/revista/[slug].astro`), con botón «Leer la revista» en una pestaña nueva.
+  - En `/recursos`, sección «Revista Astro&Ciencias» con las portadas (solo si hay números). En la franja de la portada, la revista muestra la portada del último número y enlaza a su página.
 - `src/content/areas.ts`: lista única de áreas, compartida por el esquema, Keystatic y los formularios.
-- Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/quienes-somos`, `/recursos`, `/colabora`, `/colabora/escribe` (y su `/gracias`).
+- Páginas: `/blog`, `/blog/[slug]`, `/autores`, `/quienes-somos`, `/recursos`, `/recursos/revista/[slug]`, `/colabora`, `/colabora/escribe` (y su `/gracias`).
 - Páginas de texto editables en Keystatic (grupo «Páginas»): un singleton por página, guardado en `src/content/paginas/<página>.yaml`, con su propia colección y el mismo esquema en `src/content.config.ts` (`quienesSomos`, `colabora`). En los campos de varias líneas, una línea en blanco separa párrafos. Correo y WhatsApp vienen de `src/content/contacto.ts`, compartido con el pie.
   - `/quienes-somos`: cabecera con datos destacados (solo datos reales), introducción, historia + misión + enfoque, presencia nacional (equipos con estado «Equipo activo» o «En planificación»), qué hacemos, liderazgo y coordinación (personas con foto opcional en `public/images/equipo/`; sin foto, iniciales) y llamada final con dos botones. Todo, incluidas las listas y los enlaces de los botones, se edita en Keystatic.
   - `/colabora`: tres tarjetas. Voluntariado (botón `mailto:` con asunto), colaboraciones (visitas a escuelas, colegios o universidades y otras propuestas, con botón `mailto:`) y donaciones («Próximamente», sin enlace). El botón «Colabora» de la cabecera lleva aquí.
-- `/recursos` (`src/pages/recursos.astro`, lista y enlaces en `src/content/recursos.ts`, compartida con la franja de la portada): revista Astro&Ciencias (de momento «Próximamente», sin enlace), podcast (Spotify), AstroCiencias Radio (Zeno.fm), charlas en YouTube y biblioteca virtual (Google Drive). En la portada solo hay una franja pequeña con cuatro de ellos; el enlace «Recursos» de la cabecera lleva a esta página.
+- `/recursos` (`src/pages/recursos.astro`, lista y enlaces en `src/content/recursos.ts`, compartida con la franja de la portada): revista Astro&Ciencias (enlaza a la sección de números; «Próximamente» mientras no haya ninguno), podcast (Spotify), AstroCiencias Radio (Zeno.fm), charlas en YouTube y biblioteca virtual (Google Drive). En la portada solo hay una franja pequeña con cuatro de ellos; el enlace «Recursos» de la cabecera lleva a esta página.
 - Editor propio (en construcción por fases, independiente de Keystatic): zona privada `/escribir`, acceso en `/escribir/entrar`.
   - Login con Netlify Identity, solo por invitación (`gotrue-js` en el navegador).
   - Roles en `app_metadata.roles`: `editor` (ve todo) o `autor` + `autor:<slug>` (ve los artículos de `src/content/autores/<slug>.yaml`).
@@ -51,7 +54,7 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
   - Prueba e2e del flujo de revisión y publicación: `npm run test:e2e` (`tests/e2e/`). Usa Chrome instalado (o `CHROME_PATH`) con `playwright-core` y sustitutos locales de Identity (autora y editora) y de la API de GitHub (repositorio en memoria); nunca escribe en el repositorio real. Arranca y para su propio `astro dev`, así que antes hay que parar el que esté en marcha (`npx astro dev stop`). Restaura `.netlify/blobs-serve` al acabar. Si cambias el flujo o los textos de la interfaz que comprueba, actualízala.
   - Correos de Identity: se usan los de por defecto (las plantillas propias exigen el plan Pro de Netlify). Enlazan a la portada con `#invite_token`, `#recovery_token` o `#confirmation_token`; un script mínimo en `Base.astro` redirige a `/escribir/entrar` conservando el hash, y esa página procesa los tres tokens. No quites ese script de Base.
   - En local, `IDENTITY_URL` apunta a la Identity del sitio publicado y `PUBLIC_IDENTITY_URL=/identidad-dev`, un proxy de Vite (solo en `astro dev`, en `astro.config.mjs`) que reenvía a ella para evitar el error de CORS. En producción `PUBLIC_IDENTITY_URL` no se define y se usa `/.netlify/identity`.
-- `public/`: escudo.png y logotipo-blanco.png; Keystatic guarda las imágenes en `public/images/blog/` y `public/images/autores/`.
+- `public/`: escudo.png y logotipo-blanco.png; Keystatic guarda las imágenes en `public/images/blog/`, `public/images/autores/` y `public/images/revista/`.
 
 ## Diseño
 - Estilo científico y tecnológico, tipo panel de observatorio: fondo azul noche, cuadrícula técnica sutil, órbitas y etiquetas en monoespaciada.
@@ -64,8 +67,9 @@ Web y blog de AstroCiencias Ecuador, asociación de divulgación de astronomía 
 Portada simplificada:
 1. «Destacado» (`src/components/Destacado.astro`): una tarjeta grande con imagen, título, resumen y botón. Lo decide `obtenerDestacado()` en `src/lib/destacado.ts`: el próximo evento si existe (`proximoEvento()`, que aún devuelve null porque no hay fuente de eventos) y, si no, el último artículo publicado. El componente solo recibe el tipo `Destacado`, así que para los eventos basta con implementar `proximoEvento()`.
 2. Últimos artículos del blog (`UltimosArticulos.astro`): los tres más recientes sin repetir el del destacado (prop `excluir`).
-3. Franja compacta «Escucha, mira y lee» (`FranjaRecursos.astro`): podcast, radio, charlas en YouTube y revista («Próximamente»), con enlace a `/recursos`.
-4. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
+3. Franja compacta «Escucha, mira y lee» (`FranjaRecursos.astro`): podcast, radio, charlas en YouTube y revista (portada y enlace del último número, o «Próximamente» si no hay ninguno), con enlace a `/recursos`.
+4. Banda final «Colabora» (`BandaColabora.astro`), a todo el ancho: una línea, una frase y el botón «Quiero colaborar» a `/colabora`.
+5. Pie con contacto (correo y WhatsApp) y redes: Instagram, Facebook, TikTok, YouTube, LinkedIn, X.
 
 La portada no muestra un título visible: lleva un `h1` solo para lectores de pantalla.
 
